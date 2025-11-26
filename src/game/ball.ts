@@ -1,0 +1,140 @@
+import * as BABYLON from "babylonjs";
+import type { BallState, GameContext } from "./types";
+import {
+  BALL_DIAMETER,
+  BASE_HEIGHT,
+  BOUNCE_HEIGHT,
+  BOUNCE_SPEED,
+  FORWARD_BACK_SPEED,
+  GAP_FALL_GRAVITY,
+  GAP_FALL_SHRINK_RATE,
+  LATERAL_SPEED,
+  SQUASH_STRENGTH,
+  STRETCH_STRENGTH,
+} from "./config";
+
+export interface BallResources {
+  mesh: BABYLON.Mesh;
+  material: BABYLON.StandardMaterial;
+  baseColor: BABYLON.Color3;
+}
+
+export function createBall(scene: BABYLON.Scene): BallResources {
+  const ball = BABYLON.MeshBuilder.CreateSphere(
+    "ball",
+    { diameter: BALL_DIAMETER },
+    scene
+  );
+  ball.position = new BABYLON.Vector3(0, BASE_HEIGHT, 0);
+
+  const material = new BABYLON.StandardMaterial("ballMat", scene);
+  const baseColor = new BABYLON.Color3(1, 0.9, 0.3);
+  material.diffuseColor = baseColor.clone();
+  material.specularColor = new BABYLON.Color3(1, 1, 1);
+  ball.material = material;
+
+  return { mesh: ball, material, baseColor };
+}
+
+export function createBallState(): BallState {
+  return {
+    bouncePhase: 0,
+    fallVelocityY: 0,
+    fallScale: 1,
+  };
+}
+
+export function resetBall(ctx: GameContext): void {
+  ctx.ball.position.x = 0;
+  ctx.ball.position.y = BASE_HEIGHT;
+  ctx.ball.position.z = 0;
+  ctx.ball.scaling.setAll(1);
+  ctx.ballMaterial.diffuseColor = ctx.ballBaseColor.clone();
+
+  ctx.ballState.bouncePhase = 0;
+  ctx.ballState.fallVelocityY = 0;
+  ctx.ballState.fallScale = 1;
+}
+
+export function triggerGapDeath(ctx: GameContext): void {
+  if (ctx.gameState.mode !== "playing") return;
+  ctx.gameState.mode = "dead_gap";
+  ctx.ballState.fallVelocityY = 0;
+  ctx.ballState.fallScale = 1;
+  ctx.gameOverText.alpha = 1.0;
+  ctx.ballMaterial.diffuseColor = new BABYLON.Color3(0.7, 0.8, 1.0);
+}
+
+export function triggerHazardDeath(ctx: GameContext): void {
+  if (ctx.gameState.mode !== "playing") return;
+  ctx.gameState.mode = "dead_hazard";
+  ctx.gameOverText.alpha = 1.0;
+  ctx.ballMaterial.diffuseColor = new BABYLON.Color3(1, 0.3, 0.3);
+}
+
+export function updateBall(dt: number, ctx: GameContext): boolean {
+  const { ball, ballState } = ctx;
+  const mode = ctx.gameState.mode;
+  const isPlaying = mode === "playing";
+
+  const prevBouncePhase = ballState.bouncePhase;
+
+  if (isPlaying) {
+    ballState.bouncePhase += BOUNCE_SPEED * dt;
+    if (ballState.bouncePhase > Math.PI) {
+      ballState.bouncePhase -= Math.PI;
+    }
+  }
+
+  if (mode === "playing" || mode === "dead_hazard") {
+    const heightFactor = Math.sin(ballState.bouncePhase);
+    ball.position.y = BASE_HEIGHT + heightFactor * BOUNCE_HEIGHT;
+
+    if (isPlaying) {
+      let moveX = 0;
+      let moveZ = 0;
+      if (ctx.input.left) moveX -= 1;
+      if (ctx.input.right) moveX += 1;
+      if (ctx.input.up) moveZ += 1;
+      if (ctx.input.down) moveZ -= 1;
+
+      if (moveX !== 0 && moveZ !== 0) {
+        const inv = 1 / Math.sqrt(2);
+        moveX *= inv;
+        moveZ *= inv;
+      }
+
+      ball.position.x += moveX * LATERAL_SPEED * dt;
+      ball.position.z += moveZ * FORWARD_BACK_SPEED * dt;
+
+      ball.position.x = Math.max(ctx.track.minX, Math.min(ctx.track.maxX, ball.position.x));
+      ball.position.z = Math.max(
+        -ctx.track.maxZOffset,
+        Math.min(ctx.track.maxZOffset, ball.position.z)
+      );
+
+      const speedFactor = Math.abs(Math.cos(ballState.bouncePhase));
+      const squash = SQUASH_STRENGTH * (1 - heightFactor) * speedFactor;
+      const stretch = STRETCH_STRENGTH * speedFactor * heightFactor;
+
+      let targetScaleY = 1 + stretch - squash;
+      targetScaleY = Math.max(0.7, Math.min(1.25, targetScaleY));
+      const targetScaleXZ = 1 / Math.sqrt(targetScaleY);
+
+      const lerpSpeed = 10 * dt;
+      ball.scaling.y = BABYLON.Scalar.Lerp(ball.scaling.y, targetScaleY, lerpSpeed);
+      ball.scaling.x = BABYLON.Scalar.Lerp(ball.scaling.x, targetScaleXZ, lerpSpeed);
+      ball.scaling.z = ball.scaling.x;
+    }
+  } else if (mode === "dead_gap") {
+    ballState.fallVelocityY -= GAP_FALL_GRAVITY * dt;
+    ball.position.y += ballState.fallVelocityY * dt;
+
+    ballState.fallScale = Math.max(0, ballState.fallScale - GAP_FALL_SHRINK_RATE * dt);
+    ball.scaling.setAll(ballState.fallScale);
+  }
+
+  const justLanded = isPlaying && prevBouncePhase > ballState.bouncePhase;
+  return justLanded;
+}
+
