@@ -13,6 +13,8 @@ npm run dev
 - `npm run preview` serves the built files locally.
 - `npm test` runs unit tests with Vitest.
 
+CI runs `npm test` on pushes and pull requests (GitHub Actions).
+
 ## Docs
 
 See `docs/Bounder_Design_Document.md` and `docs/Refactor_Plan.md` for design details and the refactor checklist.
