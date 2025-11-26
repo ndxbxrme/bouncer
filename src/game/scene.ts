@@ -20,11 +20,26 @@ import { createGameState, updateGameState } from "./state";
 import { createTrack, getTileKindUnderBall, updateTrack } from "./track";
 import type { GameContext } from "./types";
 
-export function createGame(): void {
+function applyCanvasLayout(canvas: HTMLCanvasElement): void {
+  canvas.style.width = "100vw";
+  canvas.style.height = "100vh";
+  canvas.style.display = "block";
+  canvas.style.touchAction = "none";
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+  document.body.style.margin = "0";
+  document.body.style.padding = "0";
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+export function createGame(): GameContext {
   const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
   if (!canvas) {
     throw new Error("renderCanvas element not found");
   }
+
+  applyCanvasLayout(canvas);
 
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
@@ -108,5 +123,6 @@ export function createGame(): void {
   window.addEventListener("resize", () => {
     engine.resize();
   });
-}
 
+  return ctx;
+}
