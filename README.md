@@ -11,6 +11,7 @@ npm run dev
 
 - `npm run build` produces a production bundle.
 - `npm run preview` serves the built files locally.
+- `npm test` runs unit tests with Vitest.
 
 ## Docs
 
@@ -19,4 +20,3 @@ See `docs/Bounder_Design_Document.md` and `docs/Refactor_Plan.md` for design det
 ## Prototype
 
 The original prototype remains at `demo.html` if you need a quick comparison point.
-

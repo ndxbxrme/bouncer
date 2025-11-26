@@ -11,9 +11,8 @@
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
-    "types": ["babylonjs", "@babylonjs/gui"]
+    "types": ["babylonjs", "@babylonjs/gui", "vitest", "node"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
-
