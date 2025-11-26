@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Babylon.js - Bounder Style Demo 5 (Squash & Stretch)</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #111;
+      font-family: system-ui, sans-serif;
+    }
+    #renderCanvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- Babylon.js core -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <!-- Babylon.js GUI for Game Over text -->
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+
+  <script>
+    const canvas = document.getElementById("renderCanvas");
+    const engine = new BABYLON.Engine(canvas, true);
+
+    const createScene = () => {
+      const scene = new BABYLON.Scene(engine);
+      scene.clearColor = new BABYLON.Color3(0.02, 0.02, 0.05);
+
+      // --- Camera ---
+      const camera = new BABYLON.ArcRotateCamera(
+        "camera",
+        -Math.PI / 2.5,
+        Math.PI / 3,
+        20,
+        new BABYLON.Vector3(0, 0, 10),
+        scene
+      );
+      camera.attachControl(canvas, true);
+
+      // --- Light ---
+      const light = new BABYLON.HemisphericLight(
+        "light",
+        new BABYLON.Vector3(0, 1, 0),
+        scene
+      );
+      light.intensity = 0.9;
+
+      // --- Ball ---
+      const ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 1 }, scene);
+      ball.position = new BABYLON.Vector3(0, 1, 0);
+
+      const ballMat = new BABYLON.StandardMaterial("ballMat", scene);
+      const ballBaseColor = new BABYLON.Color3(1, 0.9, 0.3);
+      ballMat.diffuseColor = ballBaseColor.clone();
+      ballMat.specularColor = new BABYLON.Color3(1, 1, 1);
+      ball.material = ballMat;
+
+      // --- UI (Game Over text) ---
+      const ui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
+      const gameOverText = new BABYLON.GUI.TextBlock();
+      gameOverText.text = "GAME OVER\nPress SPACE to restart";
+      gameOverText.color = "white";
+      gameOverText.fontSize = 48;
+      gameOverText.alpha = 0.0;
+      gameOverText.outlineWidth = 4;
+      gameOverText.outlineColor = "red";
+      ui.addControl(gameOverText);
+
+      // --- Track / tiles setup ---
+      const tileSize = 2;
+      const tilesX = 5;
+      const tilesZ = 20;
+      const halfTilesX = Math.floor(tilesX / 2);
+
+      const tiles = [];
+      const laneXPositions = [];
+      for (let i = 0; i < tilesX; i++) {
+        laneXPositions[i] = (i - halfTilesX) * tileSize;
+      }
+
+      const minX = laneXPositions[0];
+      const maxX = laneXPositions[tilesX - 1];
+      const maxZOffset = tileSize;
+
+      // Materials
+      const safeMat = new BABYLON.StandardMaterial("safeMat", scene);
+      safeMat.diffuseColor = new BABYLON.Color3(0.15, 0.6, 0.9);
+      safeMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+      safeMat.emissiveColor = new BABYLON.Color3(0.02, 0.1, 0.15);
+
+      const hazardMat = new BABYLON.StandardMaterial("hazardMat", scene);
+      hazardMat.diffuseColor = new BABYLON.Color3(0.9, 0.2, 0.2);
+      hazardMat.specularColor = new BABYLON.Color3(0.3, 0.1, 0.1);
+      hazardMat.emissiveColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+
+      // Row kinds
+      const ROW_KIND_SAFE = "safe";
+      const ROW_KIND_GAP = "gap";
+      const ROW_KIND_HAZARD = "hazard";
+
+      // rowsConfig[z][xIndex] -> kind
+      const rowsConfig = [];
+
+      const randomizeRow = (zIndex) => {
+        const kinds = [];
+        let safeCount = 0;
+
+        // First few rows: all safe
+        if (zIndex < 3) {
+          for (let xi = 0; xi < tilesX; xi++) {
+            kinds[xi] = ROW_KIND_SAFE;
+          }
+          return kinds;
+        }
+
+        for (let xi = 0; xi < tilesX; xi++) {
+          const r = Math.random();
+          let kind;
+          if (r < 0.15) {
+            kind = ROW_KIND_GAP;
+          } else if (r < 0.30) {
+            kind = ROW_KIND_HAZARD;
+          } else {
+            kind = ROW_KIND_SAFE;
+            safeCount++;
+          }
+          kinds[xi] = kind;
+        }
+
+        // Ensure at least one safe tile in the row
+        if (safeCount === 0) {
+          const safeIndex = Math.floor(Math.random() * tilesX);
+          kinds[safeIndex] = ROW_KIND_SAFE;
+        }
+
+        return kinds;
+      };
+
+      const regenerateRows = () => {
+        for (let z = 0; z < tilesZ; z++) {
+          rowsConfig[z] = randomizeRow(z);
+        }
+
+        // Update existing tiles to match new config
+        for (const tile of tiles) {
+          const zIndex = tile.metadata.baseZIndex;
+          const laneIndex = tile.metadata.laneIndex;
+          const kind = rowsConfig[zIndex][laneIndex];
+          tile.metadata.kind = kind;
+
+          if (kind === ROW_KIND_SAFE) {
+            tile.material = safeMat;
+            tile.isVisible = true;
+            tile.scaling.y = 1;
+            tile.position.y = 0;
+          } else if (kind === ROW_KIND_GAP) {
+            tile.material = safeMat;
+            tile.isVisible = false;
+            tile.scaling.y = 1;
+            tile.position.y = 0;
+          } else if (kind === ROW_KIND_HAZARD) {
+            tile.material = hazardMat;
+            tile.isVisible = true;
+            tile.scaling.y = 1.5;
+            tile.position.y = 0.4;
+          }
+        }
+      };
+
+      regenerateRows();
+
+      // Create tile meshes
+      for (let z = 0; z < tilesZ; z++) {
+        for (let xi = 0; xi < tilesX; xi++) {
+          const laneX = laneXPositions[xi];
+          const kind = rowsConfig[z][xi];
+
+          const tile = BABYLON.MeshBuilder.CreateBox("tile", {
+            width: tileSize * 0.95,
+            height: 0.2,
+            depth: tileSize * 0.95
+          }, scene);
+
+          tile.metadata = {
+            baseX: laneX,
+            baseZIndex: z,
+            laneIndex: xi,
+            kind: kind
+          };
+
+          const baseZ = z * tileSize;
+          tile.position = new BABYLON.Vector3(laneX, 0, baseZ);
+
+          if (kind === ROW_KIND_SAFE) {
+            tile.material = safeMat;
+            tile.isVisible = true;
+            tile.scaling.y = 1;
+            tile.position.y = 0;
+          } else if (kind === ROW_KIND_GAP) {
+            tile.material = safeMat;
+            tile.isVisible = false;
+          } else if (kind === ROW_KIND_HAZARD) {
+            tile.material = hazardMat;
+            tile.isVisible = true;
+            tile.scaling.y = 1.5;
+            tile.position.y = 0.4;
+          }
+
+          tiles.push(tile);
+        }
+      }
+
+      const trackLength = tilesZ * tileSize;
+
+      // --- Game state ---
+      // "playing" | "dead_gap" | "dead_hazard"
+      let gameState = "playing";
+
+      let time = 0;
+      let scrollOffset = 0;
+      const speed = 8;
+
+      // Bounce
+      const bounceSpeed = 6;
+      const bounceHeight = 0.7;
+      const baseHeight = 0.8;
+      let bouncePhase = 0; // 0..PI
+
+      // Squash & stretch parameters
+      const squashStrength = 0.2;   // softer squash
+      const stretchStrength = 0.25; // stretch felt good, keep it
+
+      // Falling (gap)
+      let fallVelocityY = 0;
+      let fallScale = 1;
+
+      // Input state
+      const input = { left: false, right: false, up: false, down: false };
+      const lateralSpeed = 6;
+      const forwardBackSpeed = 4;
+
+      // --- Input handling ---
+      const setKeyState = (e, isDown) => {
+        switch (e.key) {
+          case "ArrowLeft":
+          case "a":
+          case "A":
+            input.left = isDown;
+            break;
+          case "ArrowRight":
+          case "d":
+          case "D":
+            input.right = isDown;
+            break;
+          case "ArrowUp":
+          case "w":
+          case "W":
+            input.up = isDown;
+            break;
+          case "ArrowDown":
+          case "s":
+          case "S":
+            input.down = isDown;
+            break;
+        }
+      };
+
+      const resetGame = () => {
+        gameState = "playing";
+        time = 0;
+        scrollOffset = 0;
+        bouncePhase = 0;
+
+        ball.position.x = 0;
+        ball.position.y = baseHeight;
+        ball.position.z = 0;
+        ball.scaling = new BABYLON.Vector3(1, 1, 1);
+        ballMat.diffuseColor = ballBaseColor.clone();
+
+        fallVelocityY = 0;
+        fallScale = 1;
+        gameOverText.alpha = 0.0;
+
+        regenerateRows();
+      };
+
+      window.addEventListener("keydown", (e) => {
+        // Restart on SPACE when dead
+        if (e.code === "Space") {
+          if (gameState !== "playing") resetGame();
+          return;
+        }
+        setKeyState(e, true);
+      });
+
+      window.addEventListener("keyup", (e) => {
+        setKeyState(e, false);
+      });
+
+      // --- Death handlers ---
+      const triggerGapDeath = () => {
+        if (gameState !== "playing") return;
+        gameState = "dead_gap";
+        fallVelocityY = 0;
+        fallScale = 1;
+        gameOverText.alpha = 1.0;
+        ballMat.diffuseColor = new BABYLON.Color3(0.7, 0.8, 1.0);
+      };
+
+      const triggerHazardDeath = () => {
+        if (gameState !== "playing") return;
+        gameState = "dead_hazard";
+        gameOverText.alpha = 1.0;
+        ballMat.diffuseColor = new BABYLON.Color3(1, 0.3, 0.3);
+      };
+
+      // --- Collision check at landing ---
+      const checkCollisionAtLanding = () => {
+        const laneFloat = ball.position.x / tileSize + halfTilesX;
+        let laneIndex = Math.round(laneFloat);
+        laneIndex = Math.max(0, Math.min(tilesX - 1, laneIndex));
+
+        const baseZForBall = scrollOffset + ball.position.z;
+        let wrappedBaseZ = baseZForBall % trackLength;
+        if (wrappedBaseZ < 0) wrappedBaseZ += trackLength;
+
+        const currentRowIndex = Math.floor((wrappedBaseZ + tileSize / 2) / tileSize) % tilesZ;
+        const kind = rowsConfig[currentRowIndex][laneIndex];
+
+        if (kind === ROW_KIND_GAP) {
+          triggerGapDeath();
+        } else if (kind === ROW_KIND_HAZARD) {
+          triggerHazardDeath();
+        }
+      };
+
+      // --- Main update loop ---
+      scene.onBeforeRenderObservable.add(() => {
+        const dt = scene.getEngine().getDeltaTime() / 1000;
+        const isPlaying = (gameState === "playing");
+
+        // Time & scrolling
+        if (isPlaying) {
+          time += dt;
+          scrollOffset = (scrollOffset + speed * dt) % trackLength;
+        }
+
+        // Bounce phase
+        const prevBouncePhase = bouncePhase;
+        if (isPlaying) {
+          bouncePhase += bounceSpeed * dt;
+          if (bouncePhase > Math.PI) bouncePhase -= Math.PI;
+        }
+
+        // Vertical + squash/stretch
+        if (gameState === "playing" || gameState === "dead_hazard") {
+          // Height (0 at ground, 1 at apex)
+          const heightFactor = Math.sin(bouncePhase);
+          ball.position.y = baseHeight + heightFactor * bounceHeight;
+
+          // SQUASH & STRETCH (only while actively playing)
+            if (gameState === "playing") {
+            // heightFactor: 0 at ground, 1 at apex
+            // speedFactor: 1 when moving fastest vertically (around contact), 0 at apex
+            const speedFactor = Math.abs(Math.cos(bouncePhase));
+
+            // Squash: strongest near the ground *and* when moving fast.
+            // Using (1 - heightFactor) makes it linger a bit instead of a single frame.
+            const squash = squashStrength * (1 - heightFactor) * speedFactor;
+
+            // Stretch: keep existing logic idea – strongest when moving fast and not near ground
+            const stretch = stretchStrength * speedFactor * heightFactor;
+
+            let targetScaleY = 1 + stretch - squash;
+            targetScaleY = Math.max(0.7, Math.min(1.25, targetScaleY)); // gentler range
+
+            // Volume-ish preservation
+            const targetScaleXZ = 1 / Math.sqrt(targetScaleY);
+
+            // Smoothly interpolate (prevents one-frame “pops”)
+            const lerpSpeed = 10 * dt; // dt from outer scope
+            ball.scaling.y = BABYLON.Scalar.Lerp(ball.scaling.y, targetScaleY, lerpSpeed);
+            ball.scaling.x = BABYLON.Scalar.Lerp(ball.scaling.x, targetScaleXZ, lerpSpeed);
+            ball.scaling.z = ball.scaling.x;
+            }
+        } else if (gameState === "dead_gap") {
+          // Falling through gap (no squash/stretch here)
+          const gravity = 20;
+          fallVelocityY -= gravity * dt;
+          ball.position.y += fallVelocityY * dt;
+
+          fallScale = Math.max(0, fallScale - 0.5 * dt);
+          ball.scaling.setAll(fallScale);
+        }
+
+        // Landing detection (while playing)
+        const justLanded = isPlaying && prevBouncePhase > bouncePhase;
+        if (justLanded) {
+          checkCollisionAtLanding();
+        }
+
+        // Horizontal + forward/back (only while playing)
+        if (isPlaying) {
+          let moveX = 0;
+          let moveZ = 0;
+          if (input.left) moveX -= 1;
+          if (input.right) moveX += 1;
+          if (input.up) moveZ += 1;
+          if (input.down) moveZ -= 1;
+
+          if (moveX !== 0 && moveZ !== 0) {
+            const inv = 1 / Math.sqrt(2);
+            moveX *= inv;
+            moveZ *= inv;
+          }
+
+          ball.position.x += moveX * lateralSpeed * dt;
+          ball.position.z += moveZ * forwardBackSpeed * dt;
+
+          if (ball.position.x < minX) ball.position.x = minX;
+          if (ball.position.x > maxX) ball.position.x = maxX;
+          if (ball.position.z < -maxZOffset) ball.position.z = -maxZOffset;
+          if (ball.position.z > maxZOffset) ball.position.z = maxZOffset;
+        }
+
+        // Scroll tiles
+        for (const tile of tiles) {
+          const baseZIndex = tile.metadata.baseZIndex;
+          const baseZ = baseZIndex * tileSize;
+          let z = baseZ - scrollOffset;
+          if (z < -tileSize) z += trackLength;
+          tile.position.z = z;
+          tile.position.x = tile.metadata.baseX;
+        }
+
+        // Camera
+        const cameraTargetZ = 6;
+        camera.target = new BABYLON.Vector3(0, 0, cameraTargetZ);
+      });
+
+      return scene;
+    };
+
+    const scene = createScene();
+
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
+
+    window.addEventListener("resize", () => {
+      engine.resize();
+    });
+  </script>
+</body>
+</html>
