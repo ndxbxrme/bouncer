@@ -46,6 +46,8 @@ export interface BallState {
   bouncePhase: number;
   fallVelocityY: number;
   fallScale: number;
+  velX: number;
+  velZ: number;
 }
 
 export interface HudElements {
@@ -54,6 +56,14 @@ export interface HudElements {
   time: HTMLDivElement;
   status: HTMLDivElement;
   controls: HTMLDivElement;
+}
+
+export interface DebugParams {
+  lateralAcceleration: number;
+  lateralFriction: number;
+  cameraFollowXFactor: number;
+  cameraFollowZFactor: number;
+  cameraFovBoost: number;
 }
 
 export interface GameContext {
@@ -70,4 +80,5 @@ export interface GameContext {
   input: InputState;
   gameState: GameState;
   hud: HudElements;
+  debug: DebugParams;
 }

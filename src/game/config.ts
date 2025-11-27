@@ -4,8 +4,10 @@ export const TILES_Z = 20;
 export const SAFE_ROW_COUNT = 3;
 
 export const SCROLL_SPEED = 8;
-export const LATERAL_SPEED = 6;
-export const FORWARD_BACK_SPEED = 4;
+export const LATERAL_SPEED = 6; // max horizontal speed
+export const FORWARD_BACK_SPEED = 4; // max forward/back speed
+export const LATERAL_ACCELERATION = 20;
+export const LATERAL_FRICTION = 6; // higher = quicker slowdown
 
 export const BALL_DIAMETER = 1;
 export const BASE_HEIGHT = 0.8;

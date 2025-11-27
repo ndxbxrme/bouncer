@@ -30,6 +30,13 @@ function makeCtx(): GameContext {
     ballMaterial: {} as any,
     ballBaseColor: {} as any,
     ballState: { bouncePhase: 0, fallVelocityY: 0, fallScale: 1 },
+    debug: {
+      lateralAcceleration: 20,
+      lateralFriction: 6,
+      cameraFollowXFactor: 0.08,
+      cameraFollowZFactor: 0.12,
+      cameraFovBoost: 0.03,
+    },
     track: {
       trackLength: 20,
       tiles: [],

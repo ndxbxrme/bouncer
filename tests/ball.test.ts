@@ -37,6 +37,13 @@ function makeCtx(): GameContext {
     ballMaterial: ballResources.material as any,
     ballBaseColor: ballResources.baseColor as any,
     ballState,
+    debug: {
+      lateralAcceleration: 20,
+      lateralFriction: 6,
+      cameraFollowXFactor: 0.08,
+      cameraFollowZFactor: 0.12,
+      cameraFovBoost: 0.03,
+    },
     track: {
       minX: -2,
       maxX: 2,
@@ -68,6 +75,8 @@ describe("ball module", () => {
     ctx.ballState.bouncePhase = 10;
     ctx.ballState.fallVelocityY = 5;
     ctx.ballState.fallScale = 0.2;
+    ctx.ballState.velX = 2;
+    ctx.ballState.velZ = -3;
 
     resetBall(ctx);
 
@@ -78,7 +87,13 @@ describe("ball module", () => {
     expect(ctx.ball.scaling.y).toBe(1);
     expect(ctx.ball.scaling.z).toBe(1);
     expect(ctx.ballMaterial.diffuseColor).toEqual(ctx.ballBaseColor);
-    expect(ctx.ballState).toEqual({ bouncePhase: 0, fallVelocityY: 0, fallScale: 1 });
+    expect(ctx.ballState).toEqual({
+      bouncePhase: 0,
+      fallVelocityY: 0,
+      fallScale: 1,
+      velX: 0,
+      velZ: 0,
+    });
   });
 
   it("updateBall returns true when bounce phase wraps (landing)", () => {
@@ -88,6 +103,19 @@ describe("ball module", () => {
     expect(landed).toBe(true);
   });
 
+  it("applies acceleration and friction for smoother direction changes", () => {
+    const ctx = makeCtx();
+    ctx.input.right = true;
+    updateBall(0.2, ctx);
+    expect(ctx.ballState.velX).toBeGreaterThan(0);
+
+    // Release input and ensure velocity decays
+    ctx.input.right = false;
+    const prevVel = ctx.ballState.velX;
+    updateBall(0.2, ctx);
+    expect(ctx.ballState.velX).toBeLessThan(prevVel);
+  });
+
   it("clamps movement within track bounds", () => {
     const ctx = makeCtx();
     ctx.input.left = true;
@@ -95,7 +123,7 @@ describe("ball module", () => {
     ctx.ball.position.x = ctx.track.minX - 5;
     ctx.ball.position.z = ctx.track.maxZOffset + 5;
 
-    updateBall(0.1, ctx);
+    updateBall(0.5, ctx);
 
     expect(ctx.ball.position.x).toBeGreaterThanOrEqual(ctx.track.minX);
     expect(ctx.ball.position.z).toBeLessThanOrEqual(ctx.track.maxZOffset);

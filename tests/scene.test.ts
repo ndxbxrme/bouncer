@@ -56,4 +56,10 @@ describe("scene layout and resize", () => {
     expect(ctx.camera.target.z).toBeGreaterThan(0);
     expect(ctx.camera.fov).toBeGreaterThanOrEqual(initialFov);
   });
+
+  it("exposes debug params with defaults", () => {
+    const ctx = createGame();
+    expect(ctx.debug.lateralAcceleration).toBeGreaterThan(0);
+    expect(ctx.debug.lateralFriction).toBeGreaterThan(0);
+  });
 });

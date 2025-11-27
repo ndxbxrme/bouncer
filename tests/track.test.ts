@@ -30,6 +30,13 @@ function makeCtx(track: TrackData): GameContext {
     camera: {} as any,
     ui: {} as any,
     gameOverText: {} as any,
+    debug: {
+      lateralAcceleration: 20,
+      lateralFriction: 6,
+      cameraFollowXFactor: 0.08,
+      cameraFollowZFactor: 0.12,
+      cameraFovBoost: 0.03,
+    },
     hud: {
       root: {} as any,
       distance: { textContent: "" } as any,

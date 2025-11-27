@@ -18,13 +18,11 @@ import {
   CAMERA_BOB_AMPLITUDE,
   CAMERA_BOB_SPEED,
   CAMERA_FOLLOW_LERP,
-  CAMERA_FOLLOW_X_FACTOR,
-  CAMERA_FOLLOW_Z_FACTOR,
   CAMERA_FOV_BASE,
-  CAMERA_FOV_BOOST,
   CAMERA_TARGET_Y,
   CAMERA_TARGET_Z,
 } from "./config";
+import { createDebugParams, attachDebugPanel } from "./debug";
 import { attachInputHandlers, createInput } from "./input";
 import { createGameState, updateGameState } from "./state";
 import { createTrack, getTileKindUnderBall, updateTrack } from "./track";
@@ -54,8 +52,8 @@ export function applyCameraEffects(ctx: GameContext, dt: number): void {
   const inputZ = (ctx.input.down ? -1 : 0) + (ctx.input.up ? 1 : 0);
   const inputMagnitude = Math.min(1, Math.sqrt(inputX * inputX + inputZ * inputZ));
 
-  const targetX = ctx.ball.position.x * CAMERA_FOLLOW_X_FACTOR;
-  const targetZ = CAMERA_TARGET_Z + ctx.ball.position.z * CAMERA_FOLLOW_Z_FACTOR;
+  const targetX = ctx.ball.position.x * ctx.debug.cameraFollowXFactor;
+  const targetZ = CAMERA_TARGET_Z + ctx.ball.position.z * ctx.debug.cameraFollowZFactor;
   const bobY =
     CAMERA_TARGET_Y +
     Math.sin(ctx.gameState.time * CAMERA_BOB_SPEED) * CAMERA_BOB_AMPLITUDE;
@@ -64,7 +62,7 @@ export function applyCameraEffects(ctx: GameContext, dt: number): void {
   ctx.camera.target.y = smoothStep(ctx.camera.target.y, bobY, dt, CAMERA_FOLLOW_LERP);
   ctx.camera.target.z = smoothStep(ctx.camera.target.z, targetZ, dt, CAMERA_FOLLOW_LERP);
 
-  const targetFov = CAMERA_FOV_BASE + CAMERA_FOV_BOOST * inputMagnitude;
+  const targetFov = CAMERA_FOV_BASE + ctx.debug.cameraFovBoost * inputMagnitude;
   ctx.camera.fov = smoothStep(ctx.camera.fov, targetFov, dt, CAMERA_FOLLOW_LERP);
 }
 
@@ -111,6 +109,8 @@ export function createGame(): GameContext {
   attachInputHandlers(input);
   const gameState = createGameState();
   const hud = createHud();
+  const debug = createDebugParams();
+  attachDebugPanel(debug);
 
   const ctx: GameContext = {
     engine,
@@ -126,6 +126,7 @@ export function createGame(): GameContext {
     input,
     gameState,
     hud,
+    debug,
   };
 
   scene.onBeforeRenderObservable.add(() => {

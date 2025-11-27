@@ -41,6 +41,8 @@ export function createBallState(): BallState {
     bouncePhase: 0,
     fallVelocityY: 0,
     fallScale: 1,
+    velX: 0,
+    velZ: 0,
   };
 }
 
@@ -54,6 +56,8 @@ export function resetBall(ctx: GameContext): void {
   ctx.ballState.bouncePhase = 0;
   ctx.ballState.fallVelocityY = 0;
   ctx.ballState.fallScale = 1;
+  ctx.ballState.velX = 0;
+  ctx.ballState.velZ = 0;
 }
 
 export function triggerGapDeath(ctx: GameContext): void {
@@ -91,21 +95,38 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
     ball.position.y = BASE_HEIGHT + heightFactor * BOUNCE_HEIGHT;
 
     if (isPlaying) {
-      let moveX = 0;
-      let moveZ = 0;
-      if (ctx.input.left) moveX -= 1;
-      if (ctx.input.right) moveX += 1;
-      if (ctx.input.up) moveZ += 1;
-      if (ctx.input.down) moveZ -= 1;
+      let inputX = 0;
+      let inputZ = 0;
+      if (ctx.input.left) inputX -= 1;
+      if (ctx.input.right) inputX += 1;
+      if (ctx.input.up) inputZ += 1;
+      if (ctx.input.down) inputZ -= 1;
 
-      if (moveX !== 0 && moveZ !== 0) {
-        const inv = 1 / Math.sqrt(2);
-        moveX *= inv;
-        moveZ *= inv;
+      let magnitude = Math.sqrt(inputX * inputX + inputZ * inputZ);
+      if (magnitude > 0) {
+        inputX /= magnitude;
+        inputZ /= magnitude;
       }
 
-      ball.position.x += moveX * LATERAL_SPEED * dt;
-      ball.position.z += moveZ * FORWARD_BACK_SPEED * dt;
+      // Acceleration and friction for smoother, less twitchy movement.
+      const accelX = inputX * ctx.debug.lateralAcceleration;
+      const accelZ = inputZ * ctx.debug.lateralAcceleration;
+      ballState.velX += accelX * dt;
+      ballState.velZ += accelZ * dt;
+
+      // Apply friction decay.
+      const friction = Math.exp(-ctx.debug.lateralFriction * dt);
+      ballState.velX *= friction;
+      ballState.velZ *= friction;
+
+      // Clamp speeds independently for lateral vs forward/back feel.
+      const maxXSpeed = LATERAL_SPEED;
+      const maxZSpeed = FORWARD_BACK_SPEED;
+      ballState.velX = Math.max(-maxXSpeed, Math.min(maxXSpeed, ballState.velX));
+      ballState.velZ = Math.max(-maxZSpeed, Math.min(maxZSpeed, ballState.velZ));
+
+      ball.position.x += ballState.velX * dt;
+      ball.position.z += ballState.velZ * dt;
 
       ball.position.x = Math.max(ctx.track.minX, Math.min(ctx.track.maxX, ball.position.x));
       ball.position.z = Math.max(
@@ -137,4 +158,3 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
   const justLanded = isPlaying && prevBouncePhase > ballState.bouncePhase;
   return justLanded;
 }
-
