@@ -6,6 +6,7 @@ describe("debug panel", () => {
     const params = createDebugParams();
     expect(params.lateralAcceleration).toBeGreaterThan(0);
     expect(params.lateralFriction).toBeGreaterThan(0);
+    expect(params.slamBounceMultiplier).toBeGreaterThan(0);
   });
 
   it("updates params when slider changes", () => {
@@ -22,6 +23,8 @@ describe("debug panel", () => {
     const params = createDebugParams();
     const panel = attachDebugPanel(params);
     const labels = Array.from(panel.querySelectorAll("label")).map((l) => l.textContent);
-    expect(labels).toEqual(expect.arrayContaining(["Bounce Spd", "Bounce Ht", "Scroll"]));
+    expect(labels).toEqual(
+      expect.arrayContaining(["Bounce Spd", "Bounce Ht", "Scroll", "Slam Boost"])
+    );
   });
 });

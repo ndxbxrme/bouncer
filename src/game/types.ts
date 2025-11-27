@@ -17,6 +17,7 @@ export interface GameState {
   scrollOffset: number;
   pause: PauseState;
   countdownTime: number;
+  slamTokens: number;
 }
 
 export interface InputState {
@@ -26,6 +27,7 @@ export interface InputState {
   down: boolean;
   restartRequested: boolean;
   pauseToggleRequested: boolean;
+  slamRequested: boolean;
 }
 
 export type TileKind = "safe" | "gap" | "hazard";
@@ -52,6 +54,8 @@ export interface BallState {
   fallScale: number;
   velX: number;
   velZ: number;
+  activeBounceMultiplier: number;
+  nextBounceBoost: number;
 }
 
 export interface HudElements {
@@ -61,6 +65,7 @@ export interface HudElements {
   status: HTMLDivElement;
   controls: HTMLDivElement;
   banner: HTMLDivElement;
+  slams: HTMLDivElement;
 }
 
 export interface DebugParams {
@@ -72,6 +77,7 @@ export interface DebugParams {
   bounceSpeed: number;
   bounceHeight: number;
   scrollSpeed: number;
+  slamBounceMultiplier: number;
 }
 
 export interface GameContext {

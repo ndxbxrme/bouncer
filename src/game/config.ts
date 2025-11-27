@@ -10,6 +10,8 @@ export const LATERAL_ACCELERATION = 20;
 export const LATERAL_FRICTION = 6; // higher = quicker slowdown
 export const TILE_FADE_START = -2;
 export const TILE_CLEAR_DISTANCE = -6;
+export const STARTING_SLAMS = 5;
+export const SLAM_BOUNCE_MULTIPLIER = 1.6;
 
 export const BALL_DIAMETER = 1;
 export const BASE_HEIGHT = 0.8;

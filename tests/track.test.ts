@@ -39,6 +39,7 @@ function makeCtx(track: TrackData): GameContext {
       bounceSpeed: 6,
       bounceHeight: 0.7,
       scrollSpeed: 8,
+      slamBounceMultiplier: 1.6,
     },
     hud: {
       root: {} as any,
@@ -60,6 +61,7 @@ function makeCtx(track: TrackData): GameContext {
       down: false,
       restartRequested: false,
       pauseToggleRequested: false,
+      slamRequested: false,
     },
     gameState: {
       mode: "playing",
@@ -67,6 +69,7 @@ function makeCtx(track: TrackData): GameContext {
       scrollOffset: 0,
       pause: "running",
       countdownTime: 0,
+      slamTokens: 5,
     },
   };
 }

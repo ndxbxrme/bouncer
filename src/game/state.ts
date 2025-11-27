@@ -1,6 +1,7 @@
 import { resetBall } from "./ball";
 import { regenerateRows, updateTrack } from "./track";
 import type { GameContext, GameMode, GameState } from "./types";
+import { STARTING_SLAMS } from "./config";
 
 export type { GameMode, GameState } from "./types";
 
@@ -11,6 +12,7 @@ export function createGameState(): GameState {
     scrollOffset: 0,
     pause: "running",
     countdownTime: 0,
+    slamTokens: STARTING_SLAMS,
   };
 }
 
@@ -20,6 +22,7 @@ export function resetGameState(ctx: GameContext): void {
   ctx.gameState.scrollOffset = 0;
   ctx.gameState.pause = "countdown";
   ctx.gameState.countdownTime = 1.0; // 1 second get-ready
+  ctx.gameState.slamTokens = STARTING_SLAMS;
   resetBall(ctx);
   regenerateRows(ctx.track);
   updateTrack(0, ctx);

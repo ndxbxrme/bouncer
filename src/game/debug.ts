@@ -7,6 +7,7 @@ import {
   CAMERA_FOLLOW_Z_FACTOR,
   LATERAL_ACCELERATION,
   LATERAL_FRICTION,
+  SLAM_BOUNCE_MULTIPLIER,
   SCROLL_SPEED,
 } from "./config";
 
@@ -20,6 +21,7 @@ export function createDebugParams(): DebugParams {
     bounceSpeed: BOUNCE_SPEED,
     bounceHeight: BOUNCE_HEIGHT,
     scrollSpeed: SCROLL_SPEED,
+    slamBounceMultiplier: SLAM_BOUNCE_MULTIPLIER,
   };
 }
 
@@ -107,6 +109,7 @@ export function attachDebugPanel(params: DebugParams): HTMLDivElement {
     { label: "Bounce Spd", key: "bounceSpeed", min: 2, max: 12, step: 0.1 },
     { label: "Bounce Ht", key: "bounceHeight", min: 0.2, max: 1.6, step: 0.05 },
     { label: "Scroll", key: "scrollSpeed", min: 2, max: 14, step: 0.2 },
+    { label: "Slam Boost", key: "slamBounceMultiplier", min: 1, max: 3, step: 0.05 },
   ];
 
   root.appendChild(title);

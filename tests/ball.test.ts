@@ -47,6 +47,7 @@ function makeCtx(): GameContext {
       bounceSpeed: 6,
       bounceHeight: 0.7,
       scrollSpeed: 8,
+      slamBounceMultiplier: 1.6,
     },
     track: {
       minX: -2,
@@ -77,6 +78,7 @@ function makeCtx(): GameContext {
       scrollOffset: 0,
       pause: "running",
       countdownTime: 0,
+      slamTokens: 5,
     },
   };
 }
@@ -110,6 +112,8 @@ describe("ball module", () => {
       fallScale: 1,
       velX: 0,
       velZ: 0,
+      activeBounceMultiplier: 1,
+      nextBounceBoost: 1,
     });
   });
 
@@ -161,5 +165,15 @@ describe("ball module", () => {
     triggerHazardDeath(ctx);
     expect(ctx.gameState.mode).toBe("dead_hazard");
     expect(ctx.gameOverText.alpha).toBe(1);
+  });
+
+  it("consumes a slam and forces a landing with boost queued", () => {
+    const ctx = makeCtx();
+    ctx.ballState.bouncePhase = Math.PI / 2;
+    ctx.input.slamRequested = true;
+    const landed = updateBall(0.05, ctx);
+    expect(landed).toBe(true);
+    expect(ctx.gameState.slamTokens).toBe(4);
+    expect(ctx.ballState.activeBounceMultiplier).toBeGreaterThan(1);
   });
 });

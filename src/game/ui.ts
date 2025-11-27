@@ -35,6 +35,7 @@ export function createHud(): HudElements {
   const distance = createLabel("Distance: 0m", "13px");
   const time = createLabel("Time: 0.0s", "13px");
   const status = createLabel("Status: Ready", "13px");
+  const slams = createLabel("Slams: 0", "13px");
 
   const controls = createLabel("WASD/Arrows move • SPACE restart", "11px", 0.75);
   controls.style.marginTop = "4px";
@@ -58,11 +59,11 @@ export function createHud(): HudElements {
   banner.style.pointerEvents = "none";
   banner.style.backdropFilter = "blur(10px)";
 
-  root.append(title, distance, time, status, controls);
+  root.append(title, distance, time, status, slams, controls);
   document.body.appendChild(root);
   document.body.appendChild(banner);
 
-  return { root, distance, time, status, controls, banner };
+  return { root, distance, time, status, controls, banner, slams };
 }
 
 export function updateHud(ctx: GameContext): void {
@@ -85,6 +86,8 @@ export function updateHud(ctx: GameContext): void {
     statusText = "Hit a hazard";
   }
   ctx.hud.status.textContent = `Status: ${statusText}`;
+
+  ctx.hud.slams.textContent = `Slams: ${ctx.gameState.slamTokens}`;
 
   if (ctx.gameState.pause === "countdown") {
     const secondsLeft = Math.max(0, ctx.gameState.countdownTime);

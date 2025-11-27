@@ -63,5 +63,6 @@ describe("scene layout and resize", () => {
     expect(ctx.debug.lateralFriction).toBeGreaterThan(0);
     expect(ctx.debug.bounceSpeed).toBeGreaterThan(0);
     expect(ctx.debug.scrollSpeed).toBeGreaterThan(0);
+    expect(ctx.debug.slamBounceMultiplier).toBeGreaterThan(0);
   });
 });

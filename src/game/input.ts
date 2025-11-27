@@ -35,6 +35,7 @@ export function createInput(): InputState {
     down: false,
     restartRequested: false,
     pauseToggleRequested: false,
+    slamRequested: false,
   };
 }
 
@@ -47,6 +48,11 @@ export function attachInputHandlers(state: InputState): void {
 
     if (e.key.toLowerCase() === "p") {
       state.pauseToggleRequested = true;
+      return;
+    }
+
+    if (e.key === "Shift" || e.code === "ShiftLeft" || e.code === "ShiftRight" || e.key === "f" || e.key === "F") {
+      state.slamRequested = true;
       return;
     }
 

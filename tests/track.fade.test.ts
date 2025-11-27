@@ -59,6 +59,7 @@ function makeCtx(track: TrackData, scrollOffset: number): GameContext {
       bounceSpeed: 6,
       bounceHeight: 0.7,
       scrollSpeed: 8,
+      slamBounceMultiplier: 1.6,
     },
     track,
     input: {
@@ -96,4 +97,3 @@ describe("track fading", () => {
     expect(track.tiles[0].visibility).toBe(1);
   });
 });
-

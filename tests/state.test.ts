@@ -41,6 +41,7 @@ function makeCtx(): GameContext {
       bounceSpeed: 6,
       bounceHeight: 0.7,
       scrollSpeed: 8,
+      slamBounceMultiplier: 1.6,
     },
     track: {
       trackLength: 20,
@@ -64,6 +65,7 @@ function makeCtx(): GameContext {
       down: false,
       restartRequested: false,
       pauseToggleRequested: false,
+      slamRequested: false,
     },
     gameState: createGameState(),
   };
@@ -89,6 +91,7 @@ describe("state module", () => {
     expect(ctx.gameOverText.alpha).toBe(0);
     expect(ctx.input.restartRequested).toBe(false);
     expect(ctx.gameState.pause).toBe("countdown");
+    expect(ctx.gameState.slamTokens).toBeGreaterThan(0);
   });
 
   it("updateGameState triggers reset when restart requested and not playing", () => {

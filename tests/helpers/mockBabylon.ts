@@ -37,6 +37,7 @@ export class Mesh {
   position: Vector3 = new Vector3();
   scaling: Vector3 = new Vector3(1, 1, 1);
   isVisible = true;
+  visibility = 1;
   material: any;
   metadata: any;
   constructor(public name: string) {}

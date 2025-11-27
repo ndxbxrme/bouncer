@@ -43,6 +43,8 @@ export function createBallState(): BallState {
     fallScale: 1,
     velX: 0,
     velZ: 0,
+    activeBounceMultiplier: 1,
+    nextBounceBoost: 1,
   };
 }
 
@@ -58,6 +60,8 @@ export function resetBall(ctx: GameContext): void {
   ctx.ballState.fallScale = 1;
   ctx.ballState.velX = 0;
   ctx.ballState.velZ = 0;
+  ctx.ballState.activeBounceMultiplier = 1;
+  ctx.ballState.nextBounceBoost = 1;
 }
 
 export function triggerGapDeath(ctx: GameContext): void {
@@ -84,15 +88,25 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
   const prevBouncePhase = ballState.bouncePhase;
 
   if (isPlaying) {
+    if (ctx.input.slamRequested && ctx.gameState.slamTokens > 0) {
+      ctx.input.slamRequested = false;
+      ctx.gameState.slamTokens -= 1;
+      ballState.nextBounceBoost = ctx.debug.slamBounceMultiplier;
+      ballState.bouncePhase = Math.PI - 0.01; // force wrap/landing on next step
+    }
+
     ballState.bouncePhase += ctx.debug.bounceSpeed * dt;
     if (ballState.bouncePhase > Math.PI) {
       ballState.bouncePhase -= Math.PI;
     }
+  } else {
+    ctx.input.slamRequested = false;
   }
 
   if (mode === "playing" || mode === "dead_hazard") {
     const heightFactor = Math.sin(ballState.bouncePhase);
-    ball.position.y = BASE_HEIGHT + heightFactor * ctx.debug.bounceHeight;
+    ball.position.y =
+      BASE_HEIGHT + heightFactor * ctx.debug.bounceHeight * ballState.activeBounceMultiplier;
 
     if (isPlaying) {
       let inputX = 0;
@@ -156,5 +170,9 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
   }
 
   const justLanded = isPlaying && prevBouncePhase > ballState.bouncePhase;
+  if (justLanded) {
+    ballState.activeBounceMultiplier = ballState.nextBounceBoost;
+    ballState.nextBounceBoost = 1;
+  }
   return justLanded;
 }
