@@ -13,6 +13,8 @@ npm run dev
 - `npm run preview` serves the built files locally.
 - `npm test` runs unit tests with Vitest.
 
+Controls: WASD/Arrow keys to move, `Space` to restart, `P` to pause/resume.
+
 CI runs `npm test` on pushes and pull requests (GitHub Actions).
 
 ## Docs

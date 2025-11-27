@@ -34,6 +34,7 @@ export function createInput(): InputState {
     up: false,
     down: false,
     restartRequested: false,
+    pauseToggleRequested: false,
   };
 }
 
@@ -44,6 +45,11 @@ export function attachInputHandlers(state: InputState): void {
       return;
     }
 
+    if (e.key.toLowerCase() === "p") {
+      state.pauseToggleRequested = true;
+      return;
+    }
+
     setKeyState(state, e.key, true);
   });
 
@@ -51,4 +57,3 @@ export function attachInputHandlers(state: InputState): void {
     setKeyState(state, e.key, false);
   });
 }
-

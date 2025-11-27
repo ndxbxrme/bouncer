@@ -32,6 +32,7 @@ function makeCtx(): GameContext {
       time: { textContent: "" } as any,
       status: { textContent: "" } as any,
       controls: { textContent: "" } as any,
+      banner: { textContent: "", style: {} as any } as any,
     },
     ball: ballResources.mesh as any,
     ballMaterial: ballResources.material as any,
@@ -62,8 +63,21 @@ function makeCtx(): GameContext {
       safeMaterial: {} as any,
       hazardMaterial: {} as any,
     },
-    input: { left: false, right: false, up: false, down: false, restartRequested: false },
-    gameState: { mode: "playing", time: 0, scrollOffset: 0 },
+    input: {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      restartRequested: false,
+      pauseToggleRequested: false,
+    },
+    gameState: {
+      mode: "playing",
+      time: 0,
+      scrollOffset: 0,
+      pause: "running",
+      countdownTime: 0,
+    },
   };
 }
 

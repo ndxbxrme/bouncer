@@ -9,11 +9,14 @@ import type {
 import type { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 
 export type GameMode = "playing" | "dead_gap" | "dead_hazard";
+export type PauseState = "running" | "paused" | "countdown";
 
 export interface GameState {
   mode: GameMode;
   time: number;
   scrollOffset: number;
+  pause: PauseState;
+  countdownTime: number;
 }
 
 export interface InputState {
@@ -22,6 +25,7 @@ export interface InputState {
   up: boolean;
   down: boolean;
   restartRequested: boolean;
+  pauseToggleRequested: boolean;
 }
 
 export type TileKind = "safe" | "gap" | "hazard";
@@ -56,6 +60,7 @@ export interface HudElements {
   time: HTMLDivElement;
   status: HTMLDivElement;
   controls: HTMLDivElement;
+  banner: HTMLDivElement;
 }
 
 export interface DebugParams {

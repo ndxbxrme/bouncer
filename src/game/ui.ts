@@ -39,10 +39,30 @@ export function createHud(): HudElements {
   const controls = createLabel("WASD/Arrows move • SPACE restart", "11px", 0.75);
   controls.style.marginTop = "4px";
 
+  const banner = document.createElement("div");
+  banner.textContent = "";
+  banner.style.position = "fixed";
+  banner.style.left = "50%";
+  banner.style.top = "32%";
+  banner.style.transform = "translate(-50%, -50%)";
+  banner.style.padding = "16px 28px";
+  banner.style.borderRadius = "14px";
+  banner.style.background = "rgba(6, 10, 20, 0.6)";
+  banner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.45)";
+  banner.style.color = "#f5f7ff";
+  banner.style.fontSize = "22px";
+  banner.style.fontWeight = "700";
+  banner.style.letterSpacing = "0.06em";
+  banner.style.opacity = "0";
+  banner.style.transition = "opacity 0.15s ease-out, transform 0.2s ease-out";
+  banner.style.pointerEvents = "none";
+  banner.style.backdropFilter = "blur(10px)";
+
   root.append(title, distance, time, status, controls);
   document.body.appendChild(root);
+  document.body.appendChild(banner);
 
-  return { root, distance, time, status, controls };
+  return { root, distance, time, status, controls, banner };
 }
 
 export function updateHud(ctx: GameContext): void {
@@ -53,11 +73,30 @@ export function updateHud(ctx: GameContext): void {
   ctx.hud.time.textContent = `Time: ${seconds}s`;
 
   let statusText = "Playing";
+  if (ctx.gameState.pause === "paused") {
+    statusText = "Paused";
+  } else if (ctx.gameState.pause === "countdown") {
+    statusText = "Get Ready";
+  }
+
   if (ctx.gameState.mode === "dead_gap") {
     statusText = "Fell into a gap";
   } else if (ctx.gameState.mode === "dead_hazard") {
     statusText = "Hit a hazard";
   }
   ctx.hud.status.textContent = `Status: ${statusText}`;
-}
 
+  if (ctx.gameState.pause === "countdown") {
+    const secondsLeft = Math.max(0, ctx.gameState.countdownTime);
+    ctx.hud.banner.textContent = `Get Ready ${secondsLeft.toFixed(1)}s`;
+    ctx.hud.banner.style.opacity = "1";
+    ctx.hud.banner.style.transform = "translate(-50%, -50%) scale(1)";
+  } else if (ctx.gameState.pause === "paused") {
+    ctx.hud.banner.textContent = "Paused — press P";
+    ctx.hud.banner.style.opacity = "1";
+    ctx.hud.banner.style.transform = "translate(-50%, -50%) scale(1)";
+  } else {
+    ctx.hud.banner.style.opacity = "0";
+    ctx.hud.banner.style.transform = "translate(-50%, -50%) scale(0.98)";
+  }
+}

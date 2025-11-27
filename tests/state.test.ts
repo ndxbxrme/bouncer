@@ -6,6 +6,7 @@ vi.mock("../src/game/ball", () => ({
 
 vi.mock("../src/game/track", () => ({
   regenerateRows: vi.fn(),
+  updateTrack: vi.fn(),
 }));
 
 import * as stateModule from "../src/game/state";
@@ -25,11 +26,12 @@ function makeCtx(): GameContext {
       time: { textContent: "" } as any,
       status: { textContent: "" } as any,
       controls: { textContent: "" } as any,
+      banner: { textContent: "", style: {} as any } as any,
     },
     ball: {} as any,
     ballMaterial: {} as any,
     ballBaseColor: {} as any,
-    ballState: { bouncePhase: 0, fallVelocityY: 0, fallScale: 1 },
+    ballState: { bouncePhase: 0, fallVelocityY: 0, fallScale: 1, velX: 0, velZ: 0 },
     debug: {
       lateralAcceleration: 20,
       lateralFriction: 6,
@@ -55,7 +57,14 @@ function makeCtx(): GameContext {
       safeMaterial: {} as any,
       hazardMaterial: {} as any,
     },
-    input: { left: false, right: false, up: false, down: false, restartRequested: false },
+    input: {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      restartRequested: false,
+      pauseToggleRequested: false,
+    },
     gameState: createGameState(),
   };
 }
@@ -79,6 +88,7 @@ describe("state module", () => {
     expect(ctx.gameState.mode).toBe("playing");
     expect(ctx.gameOverText.alpha).toBe(0);
     expect(ctx.input.restartRequested).toBe(false);
+    expect(ctx.gameState.pause).toBe("countdown");
   });
 
   it("updateGameState triggers reset when restart requested and not playing", () => {
@@ -90,5 +100,34 @@ describe("state module", () => {
     expect(ctx.gameState.time).toBe(0);
     expect(ctx.gameState.scrollOffset).toBe(0);
     expect(ctx.input.restartRequested).toBe(false);
+  });
+
+  it("pauses and resumes on toggle", () => {
+    const ctx = makeCtx();
+    ctx.input.pauseToggleRequested = true;
+    updateGameState(0.1, ctx);
+    expect(ctx.gameState.pause).toBe("paused");
+
+    ctx.input.pauseToggleRequested = true;
+    updateGameState(0.1, ctx);
+    expect(ctx.gameState.pause).toBe("running");
+  });
+
+  it("counts down then transitions to running", () => {
+    const ctx = makeCtx();
+    resetGameState(ctx);
+    expect(ctx.gameState.pause).toBe("countdown");
+    updateGameState(2, ctx);
+    expect(ctx.gameState.pause).toBe("running");
+  });
+
+  it("ignores restart requests during countdown", () => {
+    const ctx = makeCtx();
+    resetGameState(ctx);
+    const countdownBefore = ctx.gameState.countdownTime;
+    ctx.input.restartRequested = true;
+    updateGameState(0.1, ctx);
+    expect(ctx.gameState.pause).toBe("countdown");
+    expect(ctx.gameState.countdownTime).toBeLessThan(countdownBefore);
   });
 });

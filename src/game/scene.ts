@@ -133,27 +133,32 @@ export function createGame(): GameContext {
     const dt = scene.getEngine().getDeltaTime() / 1000;
 
     updateGameState(dt, ctx);
-    const justLanded = updateBall(dt, ctx);
+    const isActive = ctx.gameState.pause === "running";
 
-    if (justLanded && ctx.gameState.mode === "playing") {
-      const tileKind = getTileKindUnderBall(
-        ctx.ball.position.x,
-        ctx.ball.position.z,
-        ctx.track,
-        ctx
-      );
+    if (isActive) {
+      const justLanded = updateBall(dt, ctx);
 
-      if (tileKind === "gap") {
-        triggerGapDeath(ctx);
-      } else if (tileKind === "hazard") {
-        triggerHazardDeath(ctx);
+      if (justLanded && ctx.gameState.mode === "playing") {
+        const tileKind = getTileKindUnderBall(
+          ctx.ball.position.x,
+          ctx.ball.position.z,
+          ctx.track,
+          ctx
+        );
+
+        if (tileKind === "gap") {
+          triggerGapDeath(ctx);
+        } else if (tileKind === "hazard") {
+          triggerHazardDeath(ctx);
+        }
       }
+
+      applyCameraEffects(ctx, dt);
     }
 
+    // Keep track positions synced even while paused/countdown so visuals don't jump.
     updateTrack(dt, ctx);
     updateHud(ctx);
-
-    applyCameraEffects(ctx, dt);
   });
 
   engine.runRenderLoop(() => {
