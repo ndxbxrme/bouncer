@@ -8,6 +8,8 @@ export const LATERAL_SPEED = 6; // max horizontal speed
 export const FORWARD_BACK_SPEED = 4; // max forward/back speed
 export const LATERAL_ACCELERATION = 20;
 export const LATERAL_FRICTION = 6; // higher = quicker slowdown
+export const TILE_FADE_START = -2;
+export const TILE_CLEAR_DISTANCE = -6;
 
 export const BALL_DIAMETER = 1;
 export const BASE_HEIGHT = 0.8;

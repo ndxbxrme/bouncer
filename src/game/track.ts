@@ -3,6 +3,8 @@ import {
   GAP_PROBABILITY,
   HAZARD_PROBABILITY,
   SAFE_ROW_COUNT,
+  TILE_CLEAR_DISTANCE,
+  TILE_FADE_START,
   TILE_SIZE,
   TILES_X,
   TILES_Z,
@@ -61,16 +63,19 @@ function applyTileKind(
   if (kind === "safe") {
     tile.material = safeMaterial;
     tile.isVisible = true;
+    tile.visibility = 1;
     tile.scaling.y = 1;
     tile.position.y = 0;
   } else if (kind === "gap") {
     tile.material = safeMaterial;
     tile.isVisible = false;
+    tile.visibility = 0;
     tile.scaling.y = 1;
     tile.position.y = 0;
   } else if (kind === "hazard") {
     tile.material = hazardMaterial;
     tile.isVisible = true;
+    tile.visibility = 1;
     tile.scaling.y = 1.5;
     tile.position.y = 0.4;
   }
@@ -171,12 +176,21 @@ export function updateTrack(_dt: number, ctx: GameContext): void {
     const metadata = tile.metadata as TileMetadata;
     const baseZ = metadata.baseZIndex * track.tileSize;
     let z = baseZ - ctx.gameState.scrollOffset;
-    if (z < -track.tileSize) {
+    if (z < TILE_CLEAR_DISTANCE) {
       z += track.trackLength;
     }
 
     tile.position.z = z;
     tile.position.x = metadata.baseX;
+
+    if (tile.isVisible) {
+      const fadeStart = TILE_FADE_START;
+      const fadeEnd = TILE_CLEAR_DISTANCE;
+      const t = Math.max(0, Math.min(1, (z - fadeEnd) / (fadeStart - fadeEnd)));
+      tile.visibility = t;
+    } else {
+      tile.visibility = 0;
+    }
   }
 }
 
@@ -201,4 +215,3 @@ export function getTileKindUnderBall(
     track.tilesZ;
   return track.rowsConfig[currentRowIndex][laneIndex];
 }
-

@@ -1,0 +1,21 @@
+## Game Ideas
+- pulse camera slightly when the ball hits the track or deform the track to show the hit
+- sync bounce with music
+- don't clear tiles we have passed, it looks bad, either fade them out or preferably wait until they are out of camera view before clearing them (-5 or something)
+- experiment with non-linear courses, maybe getting thinner and wider or splitting the route or changing the x center, the camera would need to smoothly adjust to follow the action
+- powerup ideas
+  - better handling
+  - smart bomb (for when we introduce enemies)
+  - increased jump height
+  - random number of slam tokens
+  - random number of coins
+- slam mechanic where the user presses the slam button and the ball imediately slams into the ground and bounces with a greater bounce height, this can be used to force a bounce when you otherwise see yourself bouncing into the center of a hole, maybe limit it to be a powerup, we could maybe have a cool lightning effect that dissipates throughout the track from the location of the slam
+- height variation, maybe have paths that lead up and down, again the camera would need to adjust
+- fade/dissolve tiles once they’re behind the camera instead of hard clearing (emissive falloff or sinking animation)
+- camera personality: slight tilt/roll based on lateral velocity, subtle FOV pulse on near-misses or slams
+- ball trail/vfx: speed-based trail ribbon/particles; hazard hits emit a quick red shockwave across nearby tiles
+- rhythm hooks: bounce-timed UI pulses or tile emissive flickers even before full music sync
+- dynamic track segments: moving/oscillating tiles, conveyor rows that modify scroll, “low-grav” zones altering bounce params
+- booster tiles: landing on one of these propels the ball forward allowing the player to clear bigger gaps (3-4 tiles)
+- enemy probes: simple hovering obstacles drifting across lanes—good smart-bomb targets later
+- HUD flare: “Perfect Slam” / “Near Miss” callouts to reward skill moments
