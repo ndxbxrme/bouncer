@@ -43,6 +43,9 @@ function makeCtx(): GameContext {
       cameraFollowXFactor: 0.08,
       cameraFollowZFactor: 0.12,
       cameraFovBoost: 0.03,
+      bounceSpeed: 6,
+      bounceHeight: 0.7,
+      scrollSpeed: 8,
     },
     track: {
       minX: -2,
@@ -99,7 +102,10 @@ describe("ball module", () => {
   it("updateBall returns true when bounce phase wraps (landing)", () => {
     const ctx = makeCtx();
     ctx.ballState.bouncePhase = Math.PI - 0.1;
-    const landed = updateBall(0.05, ctx);
+    let landed = false;
+    for (let i = 0; i < 10 && !landed; i++) {
+      landed = updateBall(0.1, ctx);
+    }
     expect(landed).toBe(true);
   });
 

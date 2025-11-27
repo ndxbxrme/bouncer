@@ -64,6 +64,9 @@ export interface DebugParams {
   cameraFollowXFactor: number;
   cameraFollowZFactor: number;
   cameraFovBoost: number;
+  bounceSpeed: number;
+  bounceHeight: number;
+  scrollSpeed: number;
 }
 
 export interface GameContext {

@@ -1,5 +1,4 @@
 import { resetBall } from "./ball";
-import { SCROLL_SPEED } from "./config";
 import { regenerateRows } from "./track";
 import type { GameContext, GameMode, GameState } from "./types";
 
@@ -31,10 +30,9 @@ export function updateGameState(dt: number, ctx: GameContext): void {
   if (isPlaying) {
     ctx.gameState.time += dt;
     ctx.gameState.scrollOffset =
-      (ctx.gameState.scrollOffset + SCROLL_SPEED * dt) % ctx.track.trackLength;
+      (ctx.gameState.scrollOffset + ctx.debug.scrollSpeed * dt) % ctx.track.trackLength;
   } else if (restartRequested) {
     resetGameState(ctx);
     return;
   }
 }
-

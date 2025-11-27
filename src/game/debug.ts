@@ -1,10 +1,13 @@
 import type { DebugParams } from "./types";
 import {
+  BOUNCE_HEIGHT,
+  BOUNCE_SPEED,
   CAMERA_FOV_BOOST,
   CAMERA_FOLLOW_X_FACTOR,
   CAMERA_FOLLOW_Z_FACTOR,
   LATERAL_ACCELERATION,
   LATERAL_FRICTION,
+  SCROLL_SPEED,
 } from "./config";
 
 export function createDebugParams(): DebugParams {
@@ -14,6 +17,9 @@ export function createDebugParams(): DebugParams {
     cameraFollowXFactor: CAMERA_FOLLOW_X_FACTOR,
     cameraFollowZFactor: CAMERA_FOLLOW_Z_FACTOR,
     cameraFovBoost: CAMERA_FOV_BOOST,
+    bounceSpeed: BOUNCE_SPEED,
+    bounceHeight: BOUNCE_HEIGHT,
+    scrollSpeed: SCROLL_SPEED,
   };
 }
 
@@ -98,6 +104,9 @@ export function attachDebugPanel(params: DebugParams): HTMLDivElement {
     { label: "Cam X", key: "cameraFollowXFactor", min: 0, max: 0.3, step: 0.01 },
     { label: "Cam Z", key: "cameraFollowZFactor", min: 0, max: 0.3, step: 0.01 },
     { label: "FOV Boost", key: "cameraFovBoost", min: 0, max: 0.12, step: 0.005 },
+    { label: "Bounce Spd", key: "bounceSpeed", min: 2, max: 12, step: 0.1 },
+    { label: "Bounce Ht", key: "bounceHeight", min: 0.2, max: 1.6, step: 0.05 },
+    { label: "Scroll", key: "scrollSpeed", min: 2, max: 14, step: 0.2 },
   ];
 
   root.appendChild(title);
@@ -109,4 +118,3 @@ export function attachDebugPanel(params: DebugParams): HTMLDivElement {
   document.body.appendChild(root);
   return root;
 }
-

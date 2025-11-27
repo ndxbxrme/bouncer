@@ -61,5 +61,7 @@ describe("scene layout and resize", () => {
     const ctx = createGame();
     expect(ctx.debug.lateralAcceleration).toBeGreaterThan(0);
     expect(ctx.debug.lateralFriction).toBeGreaterThan(0);
+    expect(ctx.debug.bounceSpeed).toBeGreaterThan(0);
+    expect(ctx.debug.scrollSpeed).toBeGreaterThan(0);
   });
 });

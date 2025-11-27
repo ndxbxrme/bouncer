@@ -36,6 +36,9 @@ function makeCtx(): GameContext {
       cameraFollowXFactor: 0.08,
       cameraFollowZFactor: 0.12,
       cameraFovBoost: 0.03,
+      bounceSpeed: 6,
+      bounceHeight: 0.7,
+      scrollSpeed: 8,
     },
     track: {
       trackLength: 20,

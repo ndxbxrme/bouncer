@@ -84,7 +84,7 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
   const prevBouncePhase = ballState.bouncePhase;
 
   if (isPlaying) {
-    ballState.bouncePhase += BOUNCE_SPEED * dt;
+    ballState.bouncePhase += ctx.debug.bounceSpeed * dt;
     if (ballState.bouncePhase > Math.PI) {
       ballState.bouncePhase -= Math.PI;
     }
@@ -92,7 +92,7 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
 
   if (mode === "playing" || mode === "dead_hazard") {
     const heightFactor = Math.sin(ballState.bouncePhase);
-    ball.position.y = BASE_HEIGHT + heightFactor * BOUNCE_HEIGHT;
+    ball.position.y = BASE_HEIGHT + heightFactor * ctx.debug.bounceHeight;
 
     if (isPlaying) {
       let inputX = 0;

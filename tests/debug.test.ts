@@ -17,5 +17,11 @@ describe("debug panel", () => {
     slider.dispatchEvent(new Event("input"));
     expect(params.lateralAcceleration).toBeCloseTo(10);
   });
-});
 
+  it("contains bounce and scroll sliders", () => {
+    const params = createDebugParams();
+    const panel = attachDebugPanel(params);
+    const labels = Array.from(panel.querySelectorAll("label")).map((l) => l.textContent);
+    expect(labels).toEqual(expect.arrayContaining(["Bounce Spd", "Bounce Ht", "Scroll"]));
+  });
+});
