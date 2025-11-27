@@ -3,8 +3,8 @@ import type {
   Color3,
   Engine,
   Mesh,
+  PBRMaterial,
   Scene,
-  StandardMaterial,
 } from "babylonjs";
 import type { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 
@@ -36,6 +36,9 @@ export interface TrackData {
   tiles: Mesh[];
   rowsConfig: TileKind[][];
   trackLength: number;
+  rowsOffset: number;
+  rowsCycle: number[];
+  rng: () => number;
   laneXPositions: number[];
   minX: number;
   maxX: number;
@@ -44,8 +47,8 @@ export interface TrackData {
   tilesX: number;
   tilesZ: number;
   halfTilesX: number;
-  safeMaterial: StandardMaterial;
-  hazardMaterial: StandardMaterial;
+  safeMaterial: PBRMaterial;
+  hazardMaterial: PBRMaterial;
 }
 
 export interface BallState {
@@ -88,7 +91,7 @@ export interface GameContext {
   ui: AdvancedDynamicTexture;
   gameOverText: TextBlock;
   ball: Mesh;
-  ballMaterial: StandardMaterial;
+  ballMaterial: PBRMaterial;
   ballBaseColor: Color3;
   ballState: BallState;
   track: TrackData;

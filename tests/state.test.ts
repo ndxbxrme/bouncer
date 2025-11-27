@@ -54,6 +54,9 @@ function makeCtx(): GameContext {
     },
     track: {
       trackLength: 20,
+      rowsOffset: 0,
+      rowsCycle: [],
+      rng: () => 0.5,
       tiles: [],
       rowsConfig: [],
       laneXPositions: [],

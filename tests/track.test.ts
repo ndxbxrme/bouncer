@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import * as mockBabylon from "./helpers/mockBabylon";
 import { getTileKindUnderBall } from "../src/game/track";
 import type { GameContext, TrackData } from "../src/game/types";
 
@@ -10,6 +11,9 @@ function makeTrack(): TrackData {
       ["gap", "safe", "safe", "hazard", "safe"],
     ],
     trackLength: 40,
+    rowsOffset: 0,
+    rowsCycle: [0, 0],
+    rng: () => 0.5,
     laneXPositions: [-4, -2, 0, 2, 4],
     minX: -4,
     maxX: 4,
@@ -18,8 +22,8 @@ function makeTrack(): TrackData {
     tilesX: 5,
     tilesZ: 2,
     halfTilesX: 2,
-    safeMaterial: {} as any,
-    hazardMaterial: {} as any,
+    safeMaterial: new mockBabylon.PBRMaterial("s", {} as any) as any,
+    hazardMaterial: new mockBabylon.PBRMaterial("h", {} as any) as any,
   };
 }
 

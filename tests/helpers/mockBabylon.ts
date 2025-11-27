@@ -54,6 +54,19 @@ export class Mesh {
   material: any;
   metadata: any;
   constructor(public name: string) {}
+  createInstance(_name: string) {
+    const inst = new Mesh(this.name);
+    inst.material = this.material;
+    return inst;
+  }
+  clone(name: string) {
+    const clone = new Mesh(name);
+    clone.material = this.material;
+    clone.metadata = this.metadata;
+    return clone;
+  }
+  setEnabled(_flag: boolean) {}
+  dispose() {}
 }
 
 export class MeshBuilder {
@@ -158,4 +171,17 @@ export class DynamicTexture extends Texture {
     };
   }
   update(_bool?: boolean) {}
+}
+
+export class VertexData {
+  positions: number[] | undefined;
+  indices: number[] | undefined;
+  normals: number[] | undefined;
+  static ExtractFromMesh(_mesh: Mesh) {
+    return new VertexData();
+  }
+  static ComputeNormals(_positions: number[], _indices: number[], _normals: number[]) {}
+  applyToMesh(_mesh: Mesh) {
+    return this;
+  }
 }

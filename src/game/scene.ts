@@ -35,6 +35,7 @@ import { attachInputHandlers, createInput } from "./input";
 import { createGameState, updateGameState } from "./state";
 import { createTrack, getTileKindUnderBall, updateTrack } from "./track";
 import { createHud, updateHud } from "./ui";
+import { createRng } from "./rng";
 import type { GameContext } from "./types";
 
 function applyCanvasLayout(canvas: HTMLCanvasElement): void {
@@ -101,7 +102,7 @@ export function createGame(): GameContext {
   scene.fogMode = Scene.FOGMODE_EXP;
   scene.fogColor = new Color3(0.01, 0.01, 0.035);
   scene.fogDensity = 0.025;
-  scene.imageProcessingConfiguration.exposure = 0.78;
+  scene.imageProcessingConfiguration.exposure = 0.6;
 
   const envTex = CubeTexture.CreateFromPrefilteredData(
     "https://assets.babylonjs.com/environments/environmentSpecular.env",
@@ -121,11 +122,11 @@ export function createGame(): GameContext {
   camera.attachControl(canvas, true);
 
   const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), scene);
-  hemiLight.intensity = 0.2;
+  hemiLight.intensity = 0.15;
 
   const dirLight = new DirectionalLight("dirLight", new Vector3(0.25, -1, -0.35), scene);
   dirLight.position = new Vector3(0, 18, -6);
-  dirLight.intensity = 1.05;
+  dirLight.intensity = 0.7;
 
   const shadowGen = new ShadowGenerator(1024, dirLight);
   shadowGen.useContactHardeningShadow = true;
@@ -144,7 +145,8 @@ export function createGame(): GameContext {
 
   const ballResources = createBall(scene);
   const ballState = createBallState();
-  const track = createTrack(scene);
+  const rng = createRng(Date.now() & 0xffffffff);
+  const track = createTrack(scene, () => rng.next());
   const input = createInput();
   attachInputHandlers(input);
   const gameState = createGameState();

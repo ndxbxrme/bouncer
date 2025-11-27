@@ -15,7 +15,7 @@ import {
 
 export interface BallResources {
   mesh: BABYLON.Mesh;
-  material: BABYLON.StandardMaterial;
+  material: BABYLON.PBRMaterial;
   baseColor: BABYLON.Color3;
 }
 

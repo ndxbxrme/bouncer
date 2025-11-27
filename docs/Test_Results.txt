@@ -1,0 +1,126 @@
+
+ ✓ tests/debug.test.ts (3)
+ ✓ tests/state.test.ts (6)
+ ✓ tests/ball.test.ts (7)
+ ❯ tests/scene.test.ts (6)
+   ❯ scene layout and resize (6)
+     × applies full-screen canvas styling
+     × resizes engine on window resize
+     × updates HUD values from game context
+     × applies camera follow/bob/fov effects
+     × applies slam pulse to fov
+     × exposes debug params with defaults
+ ❯ tests/track.test.ts (1)
+   ❯ track module (1)
+     × returns correct tile kind based on ball position and scroll
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > applies full-screen canvas styling
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:17:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > resizes engine on window resize
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:29:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > updates HUD values from game context
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:36:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > applies camera follow/bob/fov effects
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:47:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > applies slam pulse to fov
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:62:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  tests/scene.test.ts > scene layout and resize > exposes debug params with defaults
+TypeError: vertexData.applyToMesh is not a function
+ ❯ createChamferedTileMesh src/game/track.ts:116:16
+    114|       vertexData.normals
+    115|     );
+    116|     vertexData.applyToMesh(box);
+       |                ^
+    117|   }
+    118|
+ ❯ Module.createTrack src/game/track.ts:176:24
+ ❯ Module.createGame src/game/scene.ts:149:17
+ ❯ tests/scene.test.ts:70:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  tests/track.test.ts > track module > returns correct tile kind based on ball position and scroll
+ReferenceError: mockBabylon is not defined
+ ❯ makeTrack tests/track.test.ts:24:23
+     22|     tilesZ: 2,
+     23|     halfTilesX: 2,
+     24|     safeMaterial: new mockBabylon.PBRMaterial("s", {} as any) as any,
+       |                       ^
+     25|     hazardMaterial: new mockBabylon.PBRMaterial("h", {} as any) as any,
+     26|   };
+ ❯ tests/track.test.ts:92:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  7 failed | 16 passed (23)
+   Start at  13:04:05
+   Duration  5.72s (transform 4.27s, setup 1ms, collect 5.46s, tests 229ms, environment 4.37s, prepare 938ms)
+

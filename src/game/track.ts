@@ -16,9 +16,10 @@ interface TileMetadata {
   baseZIndex: number;
   laneIndex: number;
   kind: TileKind;
+  cycle: number;
 }
 
-function randomizeRow(zIndex: number, tilesX: number): TileKind[] {
+function randomizeRow(zIndex: number, tilesX: number, rng: () => number): TileKind[] {
   const kinds: TileKind[] = [];
   let safeCount = 0;
 
@@ -30,7 +31,7 @@ function randomizeRow(zIndex: number, tilesX: number): TileKind[] {
   }
 
   for (let xi = 0; xi < tilesX; xi++) {
-    const roll = Math.random();
+    const roll = rng();
     let kind: TileKind;
     if (roll < GAP_PROBABILITY) {
       kind = "gap";
@@ -44,7 +45,7 @@ function randomizeRow(zIndex: number, tilesX: number): TileKind[] {
   }
 
   if (safeCount === 0) {
-    const safeIndex = Math.floor(Math.random() * tilesX);
+    const safeIndex = Math.floor(rng() * tilesX);
     kinds[safeIndex] = "safe";
   }
 
@@ -54,8 +55,8 @@ function randomizeRow(zIndex: number, tilesX: number): TileKind[] {
 function applyTileKind(
   tile: BABYLON.Mesh,
   kind: TileKind,
-  safeMaterial: BABYLON.StandardMaterial,
-  hazardMaterial: BABYLON.StandardMaterial
+  safeMaterial: BABYLON.PBRMaterial,
+  hazardMaterial: BABYLON.PBRMaterial
 ) {
   const metadata = tile.metadata as TileMetadata;
   metadata.kind = kind;
@@ -81,7 +82,42 @@ function applyTileKind(
   }
 }
 
-export function createTrack(scene: BABYLON.Scene): TrackData {
+function createChamferedTileMesh(scene: BABYLON.Scene): BABYLON.Mesh {
+  const width = TILE_SIZE * 0.95;
+  const depth = TILE_SIZE * 0.95;
+  const height = 0.25;
+  const box = BABYLON.MeshBuilder.CreateBox(
+    "tileTemplate",
+    { width, height, depth, updatable: true },
+    scene
+  );
+
+  const vertexData = BABYLON.VertexData.ExtractFromMesh(box);
+  if (vertexData && vertexData.positions && vertexData.normals) {
+    // Soften edges by pulling edge vertices slightly inward and upward.
+    const positions = vertexData.positions;
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
+      const edgeFactor = Math.max(Math.abs(x) / (width / 2), Math.abs(z) / (depth / 2));
+      const chamfer = Math.max(0, edgeFactor - 0.8) * 0.05;
+      positions[i] = x * (1 - chamfer);
+      positions[i + 2] = z * (1 - chamfer);
+      positions[i + 1] = y + chamfer * 0.2;
+    }
+    vertexData.positions = positions;
+    // Recompute normals for proper lighting.
+    const normals: number[] = [];
+    BABYLON.VertexData.ComputeNormals(vertexData.positions, vertexData.indices ?? [], normals);
+    vertexData.normals = normals;
+    vertexData.applyToMesh(box);
+  }
+
+  return box;
+}
+
+export function createTrack(scene: BABYLON.Scene, rng: () => number): TrackData {
   const laneXPositions: number[] = [];
   const halfTilesX = Math.floor(TILES_X / 2);
   for (let i = 0; i < TILES_X; i++) {
@@ -93,18 +129,18 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
   const maxZOffset = TILE_SIZE;
 
   const safeMaterial = new BABYLON.PBRMaterial("safeMat", scene);
-  safeMaterial.albedoColor = new BABYLON.Color3(0.08, 0.26, 0.46);
-  safeMaterial.metallic = 0.08;
-  safeMaterial.roughness = 0.55;
-  safeMaterial.emissiveColor = new BABYLON.Color3(0.02, 0.06, 0.1);
-  safeMaterial.environmentIntensity = 0.55;
+  safeMaterial.albedoColor = new BABYLON.Color3(0.06, 0.22, 0.42);
+  safeMaterial.metallic = 0.03;
+  safeMaterial.roughness = 0.75;
+  safeMaterial.emissiveColor = new BABYLON.Color3(0.015, 0.045, 0.08);
+  safeMaterial.environmentIntensity = 0.25;
 
   const hazardMaterial = new BABYLON.PBRMaterial("hazardMat", scene);
-  hazardMaterial.albedoColor = new BABYLON.Color3(0.78, 0.12, 0.08);
-  hazardMaterial.metallic = 0.12;
-  hazardMaterial.roughness = 0.38;
-  hazardMaterial.emissiveColor = new BABYLON.Color3(0.35, 0.06, 0.05);
-  hazardMaterial.environmentIntensity = 0.65;
+  hazardMaterial.albedoColor = new BABYLON.Color3(0.75, 0.12, 0.08);
+  hazardMaterial.metallic = 0.05;
+  hazardMaterial.roughness = 0.42;
+  hazardMaterial.emissiveColor = new BABYLON.Color3(0.3, 0.06, 0.04);
+  hazardMaterial.environmentIntensity = 0.25;
 
   const noiseTexture = new BABYLON.DynamicTexture(
     "tileNoise",
@@ -132,8 +168,10 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
 
   const rowsConfig: TileKind[][] = [];
   for (let z = 0; z < TILES_Z; z++) {
-    rowsConfig[z] = randomizeRow(z, TILES_X);
+    rowsConfig[z] = randomizeRow(z, TILES_X, rng);
   }
+
+  const tileTemplate = createChamferedTileMesh(scene);
 
   const tiles: BABYLON.Mesh[] = [];
   for (let z = 0; z < TILES_Z; z++) {
@@ -141,23 +179,19 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
       const laneX = laneXPositions[xi];
       const kind = rowsConfig[z][xi];
 
-      const tile = BABYLON.MeshBuilder.CreateBox(
-        "tile",
-        {
-          width: TILE_SIZE * 0.95,
-          height: 0.25,
-          depth: TILE_SIZE * 0.95,
-          subdivisions: 2,
-          wrap: true,
-        },
-        scene
-      );
+      const tile = tileTemplate.clone(`tile_${z}_${xi}`);
+      tile.material = undefined;
+      tile.isVisible = true;
+      if ((tile as any).setEnabled) {
+        (tile as any).setEnabled(true);
+      }
 
       tile.metadata = {
         baseX: laneX,
         baseZIndex: z,
         laneIndex: xi,
         kind,
+        cycle: 0,
       } satisfies TileMetadata;
 
       const baseZ = z * TILE_SIZE;
@@ -168,6 +202,7 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
       tile.receiveShadows = true;
     }
   }
+  tileTemplate.dispose();
 
   const trackLength = TILES_Z * TILE_SIZE;
 
@@ -175,6 +210,9 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
     tiles,
     rowsConfig,
     trackLength,
+    rowsOffset: 0,
+    rowsCycle: new Array(TILES_Z).fill(0),
+    rng,
     laneXPositions,
     minX,
     maxX,
@@ -189,8 +227,10 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
 }
 
 export function regenerateRows(track: TrackData): void {
+  track.rowsOffset = 0;
+  track.rowsCycle.fill(0);
   for (let z = 0; z < track.tilesZ; z++) {
-    track.rowsConfig[z] = randomizeRow(z, track.tilesX);
+    track.rowsConfig[z] = randomizeRow(z, track.tilesX, track.rng);
   }
 
   for (const tile of track.tiles) {
@@ -202,13 +242,53 @@ export function regenerateRows(track: TrackData): void {
 
 export function updateTrack(_dt: number, ctx: GameContext): void {
   const { track } = ctx;
+  const trackLength = track.trackLength;
+  const offset = ctx.gameState.scrollOffset;
 
   for (const tile of track.tiles) {
     const metadata = tile.metadata as TileMetadata;
     const baseZ = metadata.baseZIndex * track.tileSize;
-    let z = baseZ - ctx.gameState.scrollOffset;
+    const desiredCycle = Math.max(0, Math.floor((offset - baseZ) / trackLength));
+
+    if (desiredCycle > track.rowsCycle[metadata.baseZIndex] && metadata.laneIndex === 0) {
+      const delta = desiredCycle - track.rowsCycle[metadata.baseZIndex];
+      track.rowsCycle[metadata.baseZIndex] = desiredCycle;
+      track.rowsOffset += delta;
+      track.rowsConfig[metadata.baseZIndex] = randomizeRow(
+        track.rowsOffset + track.tilesZ,
+        track.tilesX,
+        track.rng
+      );
+      for (const rowTile of track.tiles) {
+        const rowMeta = rowTile.metadata as TileMetadata;
+        if (rowMeta.baseZIndex === metadata.baseZIndex) {
+          const kind = track.rowsConfig[metadata.baseZIndex][rowMeta.laneIndex];
+          applyTileKind(rowTile, kind, track.safeMaterial, track.hazardMaterial);
+          rowMeta.cycle = track.rowsCycle[metadata.baseZIndex];
+        }
+      }
+    }
+
+    const worldRowIndex = metadata.baseZIndex + track.rowsCycle[metadata.baseZIndex] * track.tilesZ;
+    let z = worldRowIndex * track.tileSize - offset;
+
     if (z < TILE_CLEAR_DISTANCE) {
-      z += track.trackLength;
+      track.rowsCycle[metadata.baseZIndex] += 1;
+      track.rowsOffset += 1;
+      track.rowsConfig[metadata.baseZIndex] = randomizeRow(
+        track.rowsOffset + track.tilesZ,
+        track.tilesX,
+        track.rng
+      );
+      for (const rowTile of track.tiles) {
+        const rowMeta = rowTile.metadata as TileMetadata;
+        if (rowMeta.baseZIndex === metadata.baseZIndex) {
+          const kind = track.rowsConfig[metadata.baseZIndex][rowMeta.laneIndex];
+          applyTileKind(rowTile, kind, track.safeMaterial, track.hazardMaterial);
+          rowMeta.cycle = track.rowsCycle[metadata.baseZIndex];
+        }
+      }
+      z = (metadata.baseZIndex + track.rowsCycle[metadata.baseZIndex] * track.tilesZ) * track.tileSize - offset;
     }
 
     tile.position.z = z;
@@ -235,14 +315,7 @@ export function getTileKindUnderBall(
   let laneIndex = Math.round(laneFloat);
   laneIndex = Math.max(0, Math.min(track.tilesX - 1, laneIndex));
 
-  const baseZForBall = ctx.gameState.scrollOffset + z;
-  let wrappedBaseZ = baseZForBall % track.trackLength;
-  if (wrappedBaseZ < 0) {
-    wrappedBaseZ += track.trackLength;
-  }
-
-  const currentRowIndex =
-    Math.floor((wrappedBaseZ + track.tileSize / 2) / track.tileSize) %
-    track.tilesZ;
-  return track.rowsConfig[currentRowIndex][laneIndex];
+  const rowIndex = Math.floor((ctx.gameState.scrollOffset + z + track.tileSize / 2) / track.tileSize);
+  const baseIndex = ((rowIndex % track.tilesZ) + track.tilesZ) % track.tilesZ;
+  return track.rowsConfig[baseIndex][laneIndex];
 }

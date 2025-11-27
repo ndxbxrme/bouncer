@@ -62,7 +62,6 @@ export function updateGameState(dt: number, ctx: GameContext): void {
 
   if (isPlaying) {
     ctx.gameState.time += dt;
-    ctx.gameState.scrollOffset =
-      (ctx.gameState.scrollOffset + ctx.debug.scrollSpeed * dt) % ctx.track.trackLength;
+    ctx.gameState.scrollOffset += ctx.debug.scrollSpeed * dt;
   }
 }
