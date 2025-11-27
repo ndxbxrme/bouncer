@@ -33,6 +33,7 @@ function makeCtx(): GameContext {
       status: { textContent: "" } as any,
       controls: { textContent: "" } as any,
       banner: { textContent: "", style: {} as any } as any,
+      slams: { textContent: "" } as any,
     },
     ball: ballResources.mesh as any,
     ballMaterial: ballResources.material as any,
@@ -71,6 +72,7 @@ function makeCtx(): GameContext {
       down: false,
       restartRequested: false,
       pauseToggleRequested: false,
+      slamRequested: false,
     },
     gameState: {
       mode: "playing",
@@ -96,6 +98,9 @@ describe("ball module", () => {
     ctx.ballState.fallScale = 0.2;
     ctx.ballState.velX = 2;
     ctx.ballState.velZ = -3;
+    ctx.ballState.activeBounceMultiplier = 2;
+    ctx.ballState.nextBounceBoost = 1.5;
+    ctx.ballState.slamPulseTime = 0.3;
 
     resetBall(ctx);
 
@@ -114,6 +119,7 @@ describe("ball module", () => {
       velZ: 0,
       activeBounceMultiplier: 1,
       nextBounceBoost: 1,
+      slamPulseTime: 0,
     });
   });
 
@@ -175,5 +181,6 @@ describe("ball module", () => {
     expect(landed).toBe(true);
     expect(ctx.gameState.slamTokens).toBe(4);
     expect(ctx.ballState.activeBounceMultiplier).toBeGreaterThan(1);
+    expect(ctx.ballState.slamPulseTime).toBeGreaterThan(0);
   });
 });

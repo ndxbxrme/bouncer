@@ -33,11 +33,24 @@ export class StandardMaterial {
   }
 }
 
+export class PBRMaterial extends StandardMaterial {
+  albedoColor: Color3;
+  metallic = 0;
+  roughness = 0;
+  environmentIntensity = 1;
+  bumpTexture: any;
+  constructor(name: string, scene?: any) {
+    super(name, scene);
+    this.albedoColor = new Color3();
+  }
+}
+
 export class Mesh {
   position: Vector3 = new Vector3();
   scaling: Vector3 = new Vector3(1, 1, 1);
   isVisible = true;
   visibility = 1;
+  receiveShadows = false;
   material: any;
   metadata: any;
   constructor(public name: string) {}
@@ -70,10 +83,16 @@ export class Engine {
 export class Scene {
   clearColor: Color3 = new Color3();
   onBeforeRenderObservable = { add: (_fn: (args?: any) => void) => {} };
+  fogMode: number | undefined;
+  fogColor: Color3 | undefined;
+  fogDensity: number | undefined;
+  environmentTexture: any;
+  imageProcessingConfiguration: { exposure?: number } = {};
   constructor(public engine?: Engine) {}
   getEngine() {
     return this.engine ?? new Engine();
   }
+  createDefaultSkybox(_tex: any, _p1?: any, _p2?: any, _p3?: any, _p4?: any) {}
 }
 
 export class ArcRotateCamera {
@@ -95,4 +114,48 @@ export class ArcRotateCamera {
 export class HemisphericLight {
   intensity = 1;
   constructor(public name: string, public direction: Vector3, public scene: Scene) {}
+}
+
+export class DirectionalLight {
+  intensity = 1;
+  position = new Vector3();
+  constructor(public name: string, public direction: Vector3, public scene: Scene) {}
+}
+
+export class ShadowGenerator {
+  useContactHardeningShadow = false;
+  contactHardeningLightSizeUVRatio = 0;
+  constructor(public size: number, public light: DirectionalLight) {}
+  addShadowCaster(_mesh: any) {}
+}
+
+export class GlowLayer {
+  intensity = 1;
+  constructor(public name: string, public scene: Scene) {}
+}
+
+export class CubeTexture {
+  static CreateFromPrefilteredData(_url: string, _scene: Scene) {
+    return {};
+  }
+}
+
+export class Texture {
+  static WRAP_ADDRESSMODE = 1;
+}
+
+export class DynamicTexture extends Texture {
+  wrapU = 0;
+  wrapV = 0;
+  level = 1;
+  constructor(public name: string, public options: any, public scene?: any, public generateMipMaps?: boolean) {
+    super();
+  }
+  getContext() {
+    return {
+      fillStyle: "",
+      fillRect: (_x: number, _y: number, _w: number, _h: number) => {},
+    };
+  }
+  update(_bool?: boolean) {}
 }

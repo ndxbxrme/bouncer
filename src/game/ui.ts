@@ -37,7 +37,7 @@ export function createHud(): HudElements {
   const status = createLabel("Status: Ready", "13px");
   const slams = createLabel("Slams: 0", "13px");
 
-  const controls = createLabel("WASD/Arrows move • SPACE restart", "11px", 0.75);
+  const controls = createLabel("WASD/Arrows move • SHIFT/F slam • SPACE restart • P pause", "11px", 0.75);
   controls.style.marginTop = "4px";
 
   const banner = document.createElement("div");

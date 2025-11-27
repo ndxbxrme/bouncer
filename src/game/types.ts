@@ -56,6 +56,7 @@ export interface BallState {
   velZ: number;
   activeBounceMultiplier: number;
   nextBounceBoost: number;
+  slamPulseTime: number;
 }
 
 export interface HudElements {

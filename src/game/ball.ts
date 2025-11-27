@@ -27,11 +27,15 @@ export function createBall(scene: BABYLON.Scene): BallResources {
   );
   ball.position = new BABYLON.Vector3(0, BASE_HEIGHT, 0);
 
-  const material = new BABYLON.StandardMaterial("ballMat", scene);
+  const material = new BABYLON.PBRMaterial("ballMat", scene);
   const baseColor = new BABYLON.Color3(1, 0.9, 0.3);
-  material.diffuseColor = baseColor.clone();
-  material.specularColor = new BABYLON.Color3(1, 1, 1);
+  material.albedoColor = baseColor.clone();
+  material.metallic = 0.55;
+  material.roughness = 0.22;
+  material.environmentIntensity = 0.9;
+  material.emissiveColor = new BABYLON.Color3(0.08, 0.06, 0.02);
   ball.material = material;
+  ball.receiveShadows = true;
 
   return { mesh: ball, material, baseColor };
 }
@@ -45,6 +49,7 @@ export function createBallState(): BallState {
     velZ: 0,
     activeBounceMultiplier: 1,
     nextBounceBoost: 1,
+    slamPulseTime: 0,
   };
 }
 
@@ -62,6 +67,7 @@ export function resetBall(ctx: GameContext): void {
   ctx.ballState.velZ = 0;
   ctx.ballState.activeBounceMultiplier = 1;
   ctx.ballState.nextBounceBoost = 1;
+  ctx.ballState.slamPulseTime = 0;
 }
 
 export function triggerGapDeath(ctx: GameContext): void {
@@ -93,6 +99,7 @@ export function updateBall(dt: number, ctx: GameContext): boolean {
       ctx.gameState.slamTokens -= 1;
       ballState.nextBounceBoost = ctx.debug.slamBounceMultiplier;
       ballState.bouncePhase = Math.PI - 0.01; // force wrap/landing on next step
+      ballState.slamPulseTime = 0.35;
     }
 
     ballState.bouncePhase += ctx.debug.bounceSpeed * dt;

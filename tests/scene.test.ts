@@ -48,6 +48,7 @@ describe("scene layout and resize", () => {
     ctx.ball.position.x = 4;
     ctx.ball.position.z = 2;
     ctx.gameState.time = 1.0;
+    ctx.ballState.velX = 2;
     ctx.input.right = true;
     const initialTargetX = ctx.camera.target.x;
     const initialFov = ctx.camera.fov;
@@ -55,6 +56,14 @@ describe("scene layout and resize", () => {
     expect(ctx.camera.target.x).toBeGreaterThan(initialTargetX);
     expect(ctx.camera.target.z).toBeGreaterThan(0);
     expect(ctx.camera.fov).toBeGreaterThanOrEqual(initialFov);
+  });
+
+  it("applies slam pulse to fov", () => {
+    const ctx = createGame();
+    ctx.ballState.slamPulseTime = 0.3;
+    const initialFov = ctx.camera.fov;
+    applyCameraEffects(ctx, 0.016);
+    expect(ctx.camera.fov).toBeGreaterThan(initialFov);
   });
 
   it("exposes debug params with defaults", () => {

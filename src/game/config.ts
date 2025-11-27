@@ -12,6 +12,8 @@ export const TILE_FADE_START = -2;
 export const TILE_CLEAR_DISTANCE = -6;
 export const STARTING_SLAMS = 5;
 export const SLAM_BOUNCE_MULTIPLIER = 1.6;
+export const SLAM_FOV_PULSE_STRENGTH = 0.08;
+export const SLAM_FOV_PULSE_DECAY = 4;
 
 export const BALL_DIAMETER = 1;
 export const BASE_HEIGHT = 0.8;
@@ -36,3 +38,4 @@ export const CAMERA_BOB_AMPLITUDE = 0.35;
 export const CAMERA_BOB_SPEED = 1.4;
 export const CAMERA_FOV_BASE = 0.9;
 export const CAMERA_FOV_BOOST = 0.03;
+export const CAMERA_VELOCITY_TILT_FACTOR = 0.05;

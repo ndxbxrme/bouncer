@@ -92,15 +92,43 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
   const maxX = laneXPositions[TILES_X - 1];
   const maxZOffset = TILE_SIZE;
 
-  const safeMaterial = new BABYLON.StandardMaterial("safeMat", scene);
-  safeMaterial.diffuseColor = new BABYLON.Color3(0.15, 0.6, 0.9);
-  safeMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.2);
-  safeMaterial.emissiveColor = new BABYLON.Color3(0.02, 0.1, 0.15);
+  const safeMaterial = new BABYLON.PBRMaterial("safeMat", scene);
+  safeMaterial.albedoColor = new BABYLON.Color3(0.08, 0.26, 0.46);
+  safeMaterial.metallic = 0.08;
+  safeMaterial.roughness = 0.55;
+  safeMaterial.emissiveColor = new BABYLON.Color3(0.02, 0.06, 0.1);
+  safeMaterial.environmentIntensity = 0.55;
 
-  const hazardMaterial = new BABYLON.StandardMaterial("hazardMat", scene);
-  hazardMaterial.diffuseColor = new BABYLON.Color3(0.9, 0.2, 0.2);
-  hazardMaterial.specularColor = new BABYLON.Color3(0.3, 0.1, 0.1);
-  hazardMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.05, 0.05);
+  const hazardMaterial = new BABYLON.PBRMaterial("hazardMat", scene);
+  hazardMaterial.albedoColor = new BABYLON.Color3(0.78, 0.12, 0.08);
+  hazardMaterial.metallic = 0.12;
+  hazardMaterial.roughness = 0.38;
+  hazardMaterial.emissiveColor = new BABYLON.Color3(0.35, 0.06, 0.05);
+  hazardMaterial.environmentIntensity = 0.65;
+
+  const noiseTexture = new BABYLON.DynamicTexture(
+    "tileNoise",
+    { width: 64, height: 64 },
+    scene,
+    false
+  );
+  const ctx = noiseTexture.getContext();
+  if (ctx) {
+    for (let y = 0; y < 64; y++) {
+      for (let x = 0; x < 64; x++) {
+        const g = 25 + Math.floor(Math.random() * 25);
+        ctx.fillStyle = `rgb(${g},${g},${g})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    noiseTexture.update(false);
+    noiseTexture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
+    noiseTexture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
+    safeMaterial.bumpTexture = noiseTexture;
+    hazardMaterial.bumpTexture = noiseTexture;
+    safeMaterial.bumpTexture.level = 0.2;
+    hazardMaterial.bumpTexture.level = 0.2;
+  }
 
   const rowsConfig: TileKind[][] = [];
   for (let z = 0; z < TILES_Z; z++) {
@@ -117,8 +145,10 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
         "tile",
         {
           width: TILE_SIZE * 0.95,
-          height: 0.2,
+          height: 0.25,
           depth: TILE_SIZE * 0.95,
+          subdivisions: 2,
+          wrap: true,
         },
         scene
       );
@@ -135,6 +165,7 @@ export function createTrack(scene: BABYLON.Scene): TrackData {
 
       applyTileKind(tile, kind, safeMaterial, hazardMaterial);
       tiles.push(tile);
+      tile.receiveShadows = true;
     }
   }
 

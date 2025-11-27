@@ -1,9 +1,14 @@
 import {
   ArcRotateCamera,
   Color3,
+  CubeTexture,
+  DirectionalLight,
   Engine,
+  GlowLayer,
   HemisphericLight,
+  ImageProcessingConfiguration,
   Scene,
+  ShadowGenerator,
   Vector3,
 } from "babylonjs";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
@@ -21,6 +26,9 @@ import {
   CAMERA_FOV_BASE,
   CAMERA_TARGET_Y,
   CAMERA_TARGET_Z,
+  CAMERA_VELOCITY_TILT_FACTOR,
+  SLAM_FOV_PULSE_DECAY,
+  SLAM_FOV_PULSE_STRENGTH,
 } from "./config";
 import { createDebugParams, attachDebugPanel } from "./debug";
 import { attachInputHandlers, createInput } from "./input";
@@ -52,7 +60,9 @@ export function applyCameraEffects(ctx: GameContext, dt: number): void {
   const inputZ = (ctx.input.down ? -1 : 0) + (ctx.input.up ? 1 : 0);
   const inputMagnitude = Math.min(1, Math.sqrt(inputX * inputX + inputZ * inputZ));
 
-  const targetX = ctx.ball.position.x * ctx.debug.cameraFollowXFactor;
+  const targetX =
+    ctx.ball.position.x * ctx.debug.cameraFollowXFactor +
+    ctx.ballState.velX * CAMERA_VELOCITY_TILT_FACTOR;
   const targetZ = CAMERA_TARGET_Z + ctx.ball.position.z * ctx.debug.cameraFollowZFactor;
   const bobY =
     CAMERA_TARGET_Y +
@@ -62,8 +72,19 @@ export function applyCameraEffects(ctx: GameContext, dt: number): void {
   ctx.camera.target.y = smoothStep(ctx.camera.target.y, bobY, dt, CAMERA_FOLLOW_LERP);
   ctx.camera.target.z = smoothStep(ctx.camera.target.z, targetZ, dt, CAMERA_FOLLOW_LERP);
 
-  const targetFov = CAMERA_FOV_BASE + ctx.debug.cameraFovBoost * inputMagnitude;
+  const slamPulse = ctx.ballState.slamPulseTime;
+  const targetFov =
+    CAMERA_FOV_BASE +
+    ctx.debug.cameraFovBoost * inputMagnitude +
+    SLAM_FOV_PULSE_STRENGTH * (slamPulse > 0 ? slamPulse : 0);
   ctx.camera.fov = smoothStep(ctx.camera.fov, targetFov, dt, CAMERA_FOLLOW_LERP);
+
+  if (ctx.ballState.slamPulseTime > 0) {
+    ctx.ballState.slamPulseTime = Math.max(
+      0,
+      ctx.ballState.slamPulseTime - dt * SLAM_FOV_PULSE_DECAY
+    );
+  }
 }
 
 export function createGame(): GameContext {
@@ -76,7 +97,17 @@ export function createGame(): GameContext {
 
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
-  scene.clearColor = new Color3(0.02, 0.02, 0.05);
+  scene.clearColor = new Color3(0.01, 0.01, 0.03);
+  scene.fogMode = Scene.FOGMODE_EXP;
+  scene.fogColor = new Color3(0.01, 0.01, 0.035);
+  scene.fogDensity = 0.025;
+  scene.imageProcessingConfiguration.exposure = 0.78;
+
+  const envTex = CubeTexture.CreateFromPrefilteredData(
+    "https://assets.babylonjs.com/environments/environmentSpecular.env",
+    scene
+  );
+  scene.environmentTexture = envTex;
 
   const camera = new ArcRotateCamera(
     "camera",
@@ -89,8 +120,17 @@ export function createGame(): GameContext {
   camera.fov = CAMERA_FOV_BASE;
   camera.attachControl(canvas, true);
 
-  const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
-  light.intensity = 0.9;
+  const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), scene);
+  hemiLight.intensity = 0.2;
+
+  const dirLight = new DirectionalLight("dirLight", new Vector3(0.25, -1, -0.35), scene);
+  dirLight.position = new Vector3(0, 18, -6);
+  dirLight.intensity = 1.05;
+
+  const shadowGen = new ShadowGenerator(1024, dirLight);
+  shadowGen.useContactHardeningShadow = true;
+  shadowGen.contactHardeningLightSizeUVRatio = 0.3;
+  shadowGen.darkness = 0.35;
 
   const ui = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
   const gameOverText = new TextBlock();
@@ -111,6 +151,13 @@ export function createGame(): GameContext {
   const hud = createHud();
   const debug = createDebugParams();
   attachDebugPanel(debug);
+
+  shadowGen.addShadowCaster(ballResources.mesh);
+  for (const tile of track.tiles) {
+    shadowGen.addShadowCaster(tile);
+  }
+  const glow = new GlowLayer("glow", scene);
+  glow.intensity = 0.2;
 
   const ctx: GameContext = {
     engine,
