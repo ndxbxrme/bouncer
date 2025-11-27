@@ -19,6 +19,13 @@ function makeCtx(): GameContext {
     camera: {} as any,
     ui: {} as any,
     gameOverText: { alpha: 0 } as any,
+    hud: {
+      root: {} as any,
+      distance: { textContent: "" } as any,
+      time: { textContent: "" } as any,
+      status: { textContent: "" } as any,
+      controls: { textContent: "" } as any,
+    },
     ball: {} as any,
     ballMaterial: {} as any,
     ballBaseColor: {} as any,

@@ -48,6 +48,14 @@ export interface BallState {
   fallScale: number;
 }
 
+export interface HudElements {
+  root: HTMLDivElement;
+  distance: HTMLDivElement;
+  time: HTMLDivElement;
+  status: HTMLDivElement;
+  controls: HTMLDivElement;
+}
+
 export interface GameContext {
   engine: Engine;
   scene: Scene;
@@ -61,5 +69,5 @@ export interface GameContext {
   track: TrackData;
   input: InputState;
   gameState: GameState;
+  hud: HudElements;
 }
-

@@ -22,4 +22,11 @@ export const GAP_FALL_GRAVITY = 20;
 export const GAP_FALL_SHRINK_RATE = 0.5;
 
 export const CAMERA_TARGET_Z = 6;
-
+export const CAMERA_TARGET_Y = 0;
+export const CAMERA_FOLLOW_X_FACTOR = 0.08;
+export const CAMERA_FOLLOW_Z_FACTOR = 0.12;
+export const CAMERA_FOLLOW_LERP = 6; // higher = snappier follow
+export const CAMERA_BOB_AMPLITUDE = 0.35;
+export const CAMERA_BOB_SPEED = 1.4;
+export const CAMERA_FOV_BASE = 0.9;
+export const CAMERA_FOV_BOOST = 0.03;

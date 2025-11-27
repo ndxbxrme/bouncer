@@ -77,6 +77,7 @@ export class Scene {
 
 export class ArcRotateCamera {
   target: Vector3;
+  fov = 0.8;
   constructor(
     public name: string,
     public alpha: number,

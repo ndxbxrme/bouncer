@@ -5,7 +5,8 @@ import * as mockGUI from "./helpers/mockGUI";
 vi.mock("babylonjs", () => mockBabylon);
 vi.mock("@babylonjs/gui", () => mockGUI);
 
-import { createGame } from "../src/game/scene";
+import { applyCameraEffects, createGame } from "../src/game/scene";
+import { updateHud } from "../src/game/ui";
 
 beforeEach(() => {
   document.body.innerHTML = '<canvas id="renderCanvas"></canvas>';
@@ -29,5 +30,30 @@ describe("scene layout and resize", () => {
     const resizeSpy = vi.spyOn(ctx.engine, "resize");
     window.dispatchEvent(new Event("resize"));
     expect(resizeSpy).toHaveBeenCalled();
+  });
+
+  it("updates HUD values from game context", () => {
+    const ctx = createGame();
+    ctx.gameState.scrollOffset = 12.3;
+    ctx.gameState.time = 4.2;
+    ctx.gameState.mode = "dead_gap";
+    updateHud(ctx);
+    expect(ctx.hud.distance.textContent).toContain("12.3");
+    expect(ctx.hud.time.textContent).toContain("4.2");
+    expect(ctx.hud.status.textContent).toContain("Fell");
+  });
+
+  it("applies camera follow/bob/fov effects", () => {
+    const ctx = createGame();
+    ctx.ball.position.x = 4;
+    ctx.ball.position.z = 2;
+    ctx.gameState.time = 1.0;
+    ctx.input.right = true;
+    const initialTargetX = ctx.camera.target.x;
+    const initialFov = ctx.camera.fov;
+    applyCameraEffects(ctx, 0.016);
+    expect(ctx.camera.target.x).toBeGreaterThan(initialTargetX);
+    expect(ctx.camera.target.z).toBeGreaterThan(0);
+    expect(ctx.camera.fov).toBeGreaterThanOrEqual(initialFov);
   });
 });

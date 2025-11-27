@@ -26,6 +26,13 @@ function makeCtx(): GameContext {
     camera: new mockBabylon.ArcRotateCamera("cam", 0, 0, 0, new mockBabylon.Vector3(), scene as any),
     ui: {} as any,
     gameOverText: { alpha: 0 } as any,
+    hud: {
+      root: {} as any,
+      distance: { textContent: "" } as any,
+      time: { textContent: "" } as any,
+      status: { textContent: "" } as any,
+      controls: { textContent: "" } as any,
+    },
     ball: ballResources.mesh as any,
     ballMaterial: ballResources.material as any,
     ballBaseColor: ballResources.baseColor as any,
